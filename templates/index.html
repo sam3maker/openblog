@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% block title %}{{ t('home') }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- 主内容区 -->
+    <div class="col-lg-8">
+        <!-- 热门推荐轮播 -->
+        {% if featured %}
+        <div class="card mb-4 featured-section">
+            <div class="card-body">
+                <h5 class="card-title mb-3"><i class="bi bi-fire"></i> {{ t('featured') }}</h5>
+                <div id="featuredCarousel" class="carousel slide" data-bs-ride="carousel">
+                    <div class="carousel-inner">
+                        {% for article in featured %}
+                        <div class="carousel-item {{ 'active' if loop.first else '' }}">
+                            <a href="/article/{{ article.id }}" class="featured-item text-decoration-none">
+                                {% if article.cover_image %}
+                                <img src="{{ article.cover_image }}" class="featured-img" alt="">
+                                {% endif %}
+                                <div class="featured-info">
+                                    <h4>{{ article.title }}</h4>
+                                    <p class="text-muted mb-0">
+                                        <img src="{{ article.author.avatar or '/static/uploads/default_avatar.png' }}" class="avatar-xs" alt="">
+                                        {{ article.author.username }}
+                                        <span class="ms-2"><i class="bi bi-eye"></i> {{ article.view_count }}</span>
+                                        <span class="ms-2"><i class="bi bi-heart"></i> {{ article.like_count }}</span>
+                                    </p>
+                                </div>
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#featuredCarousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon"></span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#featuredCarousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- 排序标签 -->
+        <div class="d-flex mb-3 gap-2">
+            <a href="/?sort=latest" class="btn {{ 'btn-primary' if sort == 'latest' else 'btn-outline-primary' }} btn-sm">{{ t('latest') }}</a>
+            <a href="/?sort=hot" class="btn {{ 'btn-primary' if sort == 'hot' else 'btn-outline-primary' }} btn-sm">{{ t('hottest') }}</a>
+        </div>
+
+        <!-- 文章列表 -->
+        <div class="article-list">
+            {% for article in articles %}
+            <div class="card article-card mb-3">
+                <div class="card-body">
+                    <div class="d-flex">
+                        <div class="flex-grow-1">
+                            <h5 class="card-title">
+                                <a href="/article/{{ article.id }}" class="text-decoration-none">{{ article.title }}</a>
+                                {% if article.is_featured %}
+                                <span class="badge bg-danger ms-1">{{ t('article_pinned') }}</span>
+                                {% endif %}
+                            </h5>
+                            <p class="card-text text-muted summary">{{ article.summary[:120] }}...</p>
+                            <div class="article-meta d-flex align-items-center gap-3">
+                                <a href="/user/{{ article.author.id }}" class="text-decoration-none d-flex align-items-center">
+                                    <img src="{{ article.author.avatar or '/static/uploads/default_avatar.png' }}" class="avatar-xs" alt="">
+                                    <span class="ms-1">{{ article.author.username }}</span>
+                                </a>
+                                <span class="text-muted"><i class="bi bi-clock"></i> {{ article.published_at.strftime('%Y-%m-%d') if article.published_at else '' }}</span>
+                                <span class="text-muted"><i class="bi bi-eye"></i> {{ article.view_count }}</span>
+                                <span class="text-muted"><i class="bi bi-heart"></i> {{ article.like_count }}</span>
+                                <span class="text-muted"><i class="bi bi-chat"></i> {{ article.comment_count }}</span>
+                                {% for tag in article.tags[:3] %}
+                                <a href="/?tag={{ tag.id }}" class="badge bg-light text-dark text-decoration-none">{{ tag.name }}</a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% if article.cover_image %}
+                        <div class="ms-3">
+                            <img src="{{ article.cover_image }}" class="article-thumb" alt="">
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+            {% if not articles %}
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-inbox" style="font-size:3rem"></i>
+                <p class="mt-2">{{ t('no_articles') }}</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- 分页 -->
+        {% if pagination and pagination.pages > 1 %}
+        <nav>
+            <ul class="pagination justify-content-center">
+                <li class="page-item {{ 'disabled' if not pagination.has_prev else '' }}">
+                    <a class="page-link" href="/?page={{ pagination.prev_num }}&sort={{ sort }}&category={{ current_category }}&tag={{ current_tag }}">&laquo;</a>
+                </li>
+                {% for p in pagination.iter_pages() %}
+                <li class="page-item {{ 'active' if p == pagination.page else '' }}">
+                    <a class="page-link" href="/?page={{ p }}&sort={{ sort }}&category={{ current_category }}&tag={{ current_tag }}">{{ p }}</a>
+                </li>
+                {% endfor %}
+                <li class="page-item {{ 'disabled' if not pagination.has_next else '' }}">
+                    <a class="page-link" href="/?page={{ pagination.next_num }}&sort={{ sort }}&category={{ current_category }}&tag={{ current_tag }}">&raquo;</a>
+                </li>
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+
+    <!-- 侧边栏 -->
+    <div class="col-lg-4">
+        <!-- 分类 -->
+        {% if categories %}
+        <div class="card sidebar-card mb-3">
+            <div class="card-header"><i class="bi bi-folder"></i> {{ t('categories') }}</div>
+            <div class="card-body">
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="/" class="badge {{ 'bg-primary' if not current_category else 'bg-light text-dark' }} text-decoration-none">{{ t('all') }}</a>
+                    {% for cat in categories %}
+                    <a href="/?category={{ cat.id }}" class="badge {{ 'bg-primary' if current_category == cat.id else 'bg-light text-dark' }} text-decoration-none">
+                        {{ cat.name }} <small>({{ cat.article_count }})</small>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- 标签 -->
+        {% if tags %}
+        <div class="card sidebar-card mb-3">
+            <div class="card-header"><i class="bi bi-tags"></i> {{ t('tags') }}</div>
+            <div class="card-body">
+                <div class="d-flex flex-wrap gap-2">
+                    {% for tag in tags %}
+                    <a href="/?tag={{ tag.id }}" class="tag-link">{{ tag.name }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- 活跃作者 -->
+        <div class="card sidebar-card mb-3">
+            <div class="card-header"><i class="bi bi-people"></i> {{ t('active_authors') }}</div>
+            <div class="card-body">
+                {% set authors = articles|map(attribute='author')|unique|list %}
+                {% for author in authors[:5] %}
+                <div class="d-flex align-items-center mb-2">
+                    <a href="/user/{{ author.id }}" class="text-decoration-none d-flex align-items-center">
+                        <img src="{{ author.avatar or '/static/uploads/default_avatar.png' }}" class="avatar-sm" alt="">
+                        <span class="ms-2">{{ author.username }}</span>
+                    </a>
+                    <small class="ms-auto text-muted">{{ author.article_count }}</small>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

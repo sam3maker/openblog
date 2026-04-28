@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% block title %}{% if article %}{{ t('article_edit') }}{% else %}{{ t('write_article') }}{% endif %}{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
+<style>
+    #rich-editor { height: 400px; }
+    #markdown-preview { height: 400px; overflow-y: auto; padding: 15px; border: 1px solid #dee2e6; border-radius: 0 0 4px 4px; }
+    #markdown-input { height: 400px; font-family: monospace; }
+    .editor-tabs .nav-link.active { background: var(--bg-primary); color: white; }
+    .editor-toolbar { position: sticky; top: 56px; z-index: 10; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-12">
+        <form method="post" id="editor-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="content" id="content-hidden">
+            <input type="hidden" name="editor_type" id="editor-type-hidden" value="{{ article.editor_type if article else 'markdown' }}">
+            <input type="hidden" name="status" id="status-hidden">
+
+            <div class="mb-3">
+                <input type="text" class="form-control form-control-lg" name="title"
+                       value="{{ article.title|default('') }}" placeholder="{{ t('article_title_placeholder') }}" required>
+            </div>
+
+            <div class="editor-toolbar mb-3">
+                <ul class="nav nav-tabs editor-tabs" id="editorTabs">
+                    <li class="nav-item">
+                        <button class="nav-link {{ 'active' if (article and article.editor_type == 'markdown') or not article else '' }}"
+                                data-bs-toggle="tab" data-bs-target="#markdown-tab" onclick="switchEditor('markdown')">
+                            <i class="bi bi-markdown"></i> Markdown
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link {{ 'active' if article and article.editor_type == 'rich_text' else '' }}"
+                                data-bs-toggle="tab" data-bs-target="#richtext-tab" onclick="switchEditor('rich_text')">
+                            <i class="bi bi-type-bold"></i> Rich Text
+                        </button>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="tab-content mb-3">
+                <div class="tab-pane fade {{ 'show active' if (article and article.editor_type == 'markdown') or not article else '' }}" id="markdown-tab">
+                    <div class="row g-0">
+                        <div class="col-md-6">
+                            <textarea class="form-control" id="markdown-input" placeholder="Markdown...">{{ article.content|default('') if (not article or article.editor_type == 'markdown') else '' }}</textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <div id="markdown-preview" class="bg-light"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade {{ 'show active' if article and article.editor_type == 'rich_text' else '' }}" id="richtext-tab">
+                    <div id="rich-editor">{{ article.content_html|default('')|safe if (article and article.editor_type == 'rich_text') else '' }}</div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="mb-3">
+                        <label class="form-label">{{ t('article_summary') }}</label>
+                        <textarea class="form-control" name="summary" rows="2" placeholder="{{ t('article_summary_placeholder') }}">{{ article.summary|default('') }}</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">{{ t('article_category') }}</label>
+                        <select class="form-select" name="category_id">
+                            <option value="">{{ t('article_category_placeholder') }}</option>
+                            {% for cat in categories %}
+                            <option value="{{ cat.id }}" {{ 'selected' if article and article.category_id == cat.id else '' }}>{{ cat.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">{{ t('article_tags') }}</label>
+                        <input type="text" class="form-control" id="tags-input" placeholder="{{ t('article_tags_placeholder') }}">
+                        <div id="tags-container" class="mt-2 d-flex flex-wrap gap-1">
+                            {% if article %}
+                            {% for tag in article.tags %}
+                            <span class="badge bg-primary d-flex align-items-center">
+                                {{ tag.name }}
+                                <input type="hidden" name="tags" value="{{ tag.name }}">
+                                <button type="button" class="btn-close btn-close-white ms-1" style="font-size:0.6em" onclick="this.parentElement.remove()"></button>
+                            </span>
+                            {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">{{ t('article_cover') }}</label>
+                        <input type="file" class="form-control" name="cover_image" accept="image/*">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">{{ t('article_scheduled_time') }}</label>
+                        <input type="datetime-local" class="form-control" name="scheduled_at"
+                               value="{{ article.scheduled_at.strftime('%Y-%m-%dT%H:%M') if article and article.scheduled_at else '' }}">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-primary btn-lg" onclick="saveArticle('published')">
+                            <i class="bi bi-send"></i> {{ t('article_publish') }}
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" onclick="saveArticle('draft')">
+                            <i class="bi bi-save"></i> {{ t('article_save_draft') }}
+                        </button>
+                        {% if article %}
+                        <button type="button" class="btn btn-outline-info" onclick="saveArticle('scheduled')">
+                            <i class="bi bi-clock"></i> {{ t('article_scheduled') }}
+                        </button>
+                        {% endif %}
+                        <a href="javascript:history.back()" class="btn btn-link">{{ t('article_cancel') }}</a>
+                    </div>
+
+                    {% if article %}
+                    <div class="mt-3">
+                        <h6><i class="bi bi-clock-history"></i> {{ t('article_versions') }}</h6>
+                        <div id="versions-list" class="small">
+                            <span class="text-muted">...</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="/static/js/editor.js"></script>
+<script>
+{% if article %}
+fetch('/article/{{ article.id }}/versions').then(r=>r.json()).then(data => {
+    const el = document.getElementById('versions-list');
+    if (data.length === 0) { el.innerHTML = '<span class="text-muted">{{ t("article_no_versions") }}</span>'; return; }
+    el.innerHTML = data.map(v =>
+        `<div class="mb-1"><a href="#" onclick="loadVersion(${v.id})" class="text-decoration-none">v${v.version_number}</a> <small class="text-muted">${new Date(v.created_at).toLocaleDateString()}</small></div>`
+    ).join('');
+});
+{% endif %}
+</script>
+{% endblock %}

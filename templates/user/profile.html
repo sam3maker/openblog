@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}{{ profile_user.username }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card mb-4">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center">
+                    <img src="{{ profile_user.avatar or '/static/uploads/default_avatar.png' }}" class="avatar-lg" alt="">
+                    <div class="ms-3 flex-grow-1">
+                        <h3 class="mb-1">{{ profile_user.username }}
+                            {% if profile_user.role == 'admin' %}
+                            <span class="badge bg-danger">{{ t('admin_role_admin') }}</span>
+                            {% elif profile_user.role == 'creator' %}
+                            <span class="badge bg-primary">{{ t('admin_role_creator') }}</span>
+                            {% endif %}
+                        </h3>
+                        {% if profile_user.signature %}
+                        <p class="text-muted mb-2 fst-italic">"{{ profile_user.signature }}"</p>
+                        {% endif %}
+                        {% if profile_user.bio %}
+                        <p class="mb-2">{{ profile_user.bio }}</p>
+                        {% endif %}
+                        <div class="d-flex gap-4">
+                            <div><strong>{{ profile_user.article_count }}</strong> <span class="text-muted">{{ t('articles') }}</span></div>
+                            <div><strong>{{ profile_user.follower_count }}</strong> <span class="text-muted">{{ t('followers') }}</span></div>
+                            <div><strong>{{ profile_user.following_count }}</strong> <span class="text-muted">{{ t('following') }}</span></div>
+                        </div>
+                    </div>
+                    <div>
+                        {% if current_user.is_authenticated and current_user.id != profile_user.id %}
+                        <button class="btn {{ 'btn-secondary' if is_following else 'btn-primary' }}"
+                                onclick="toggleFollow({{ profile_user.id }})" id="follow-btn">
+                            <i class="bi {{ 'bi-check-lg' if is_following else 'bi-plus-lg' }}"></i>
+                            {{ t('unfollow') if is_following else t('follow') }}
+                        </button>
+                        {% elif current_user.id == profile_user.id %}
+                        <a href="/user/settings" class="btn btn-outline-secondary"><i class="bi bi-gear"></i> {{ t('settings') }}</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <ul class="nav nav-tabs mb-3">
+            <li class="nav-item">
+                <a class="nav-link {{ 'active' if tab == 'articles' else '' }}" href="/user/{{ profile_user.id }}?tab=articles">{{ t('articles') }}</a>
+            </li>
+            {% if current_user.is_authenticated and current_user.id == profile_user.id %}
+            <li class="nav-item">
+                <a class="nav-link {{ 'active' if tab == 'bookmarks' else '' }}" href="/user/{{ profile_user.id }}?tab=bookmarks">{{ t('bookmark') }}</a>
+            </li>
+            {% endif %}
+            <li class="nav-item">
+                <a class="nav-link" href="/user/{{ profile_user.id }}/followers">{{ t('followers') }} {{ profile_user.follower_count }}</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/user/{{ profile_user.id }}/followers?tab=following">{{ t('following') }} {{ profile_user.following_count }}</a>
+            </li>
+        </ul>
+
+        {% for item in items %}
+        {% if tab == 'articles' %}
+        <div class="card article-card mb-3">
+            <div class="card-body">
+                <h5><a href="/article/{{ item.id }}" class="text-decoration-none">{{ item.title }}</a></h5>
+                <p class="text-muted mb-2">{{ item.summary[:120] }}...</p>
+                <div class="d-flex gap-3 small text-muted">
+                    <span><i class="bi bi-clock"></i> {{ item.published_at.strftime('%Y-%m-%d') if item.published_at else '' }}</span>
+                    <span><i class="bi bi-eye"></i> {{ item.view_count }}</span>
+                    <span><i class="bi bi-heart"></i> {{ item.like_count }}</span>
+                    <span><i class="bi bi-chat"></i> {{ item.comment_count }}</span>
+                </div>
+            </div>
+        </div>
+        {% elif tab == 'bookmarks' %}
+        <div class="card article-card mb-3">
+            <div class="card-body">
+                <h5><a href="/article/{{ item.article.id }}" class="text-decoration-none">{{ item.article.title }}</a></h5>
+                <div class="d-flex gap-3 small text-muted">
+                    <span><i class="bi bi-person"></i> {{ item.article.author.username }}</span>
+                    <span><i class="bi bi-clock"></i> {{ item.created_at.strftime('%Y-%m-%d') }}</span>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+
+        {% if not items %}
+        <div class="text-center py-5 text-muted">
+            <i class="bi bi-inbox" style="font-size:3rem"></i>
+            <p class="mt-2">{{ t('no_articles') }}</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

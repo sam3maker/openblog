@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}{{ t('search') }}: {{ q }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="mb-3"><i class="bi bi-search"></i> {{ t('search_results') }}: "{{ q }}"</h4>
+                <form action="/search" method="get" class="mb-4">
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="q" value="{{ q }}" placeholder="{{ t('search_placeholder') }}">
+                        <button class="btn btn-primary" type="submit">{{ t('search') }}</button>
+                    </div>
+                </form>
+                {% for article in articles %}
+                <div class="card mb-3 border-0 border-bottom">
+                    <div class="card-body px-0">
+                        <h5><a href="/article/{{ article.id }}" class="text-decoration-none">{{ article.title }}</a></h5>
+                        <p class="text-muted mb-2">{{ article.summary[:150] }}...</p>
+                        <div class="d-flex gap-3 small text-muted">
+                            <span><i class="bi bi-person"></i> {{ article.author.username }}</span>
+                            <span><i class="bi bi-eye"></i> {{ article.view_count }}</span>
+                            <span><i class="bi bi-heart"></i> {{ article.like_count }}</span>
+                            <span><i class="bi bi-clock"></i> {{ article.published_at.strftime('%Y-%m-%d') if article.published_at else '' }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                {% if q and not articles %}
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-search" style="font-size:3rem"></i>
+                    <p class="mt-2">{{ t('search_no_results') }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

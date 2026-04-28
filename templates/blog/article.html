@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+{% block title %}{{ article.title }}{% endblock %}
+
+{% block content %}
+<article class="row">
+    <div class="col-lg-9">
+        <div class="card">
+            <div class="card-body p-4">
+                <h1 class="article-title">{{ article.title }}</h1>
+                <div class="article-meta mb-4">
+                    <a href="/user/{{ article.author.id }}" class="text-decoration-none d-inline-flex align-items-center me-3">
+                        <img src="{{ article.author.avatar or '/static/uploads/default_avatar.png' }}" class="avatar-sm" alt="">
+                        <span class="ms-2 fw-bold">{{ article.author.username }}</span>
+                    </a>
+                    <span class="text-muted me-3">
+                        <i class="bi bi-clock"></i> {{ article.published_at.strftime('%Y-%m-%d %H:%M') if article.published_at else article.created_at.strftime('%Y-%m-%d %H:%M') }}
+                    </span>
+                    <span class="text-muted me-3"><i class="bi bi-eye"></i> {{ article.view_count }}</span>
+                    <span class="text-muted me-3"><i class="bi bi-heart"></i> {{ article.like_count }}</span>
+                    {% if article.category %}
+                    <a href="/category/{{ article.category.id }}" class="badge bg-secondary text-decoration-none me-2">{{ article.category.name }}</a>
+                    {% endif %}
+                    {% for tag in article.tags %}
+                    <a href="/?tag={{ tag.id }}" class="badge bg-light text-dark text-decoration-none me-1">{{ tag.name }}</a>
+                    {% endfor %}
+                </div>
+
+                {% if article.cover_image %}
+                <div class="article-cover mb-4">
+                    <img src="{{ article.cover_image }}" class="img-fluid rounded" alt="">
+                </div>
+                {% endif %}
+
+                <div class="article-content">
+                    {{ article.content_html|safe }}
+                </div>
+
+                <div class="article-actions d-flex gap-3 mt-4 pt-3 border-top">
+                    {% if current_user.is_authenticated %}
+                    <button class="btn {{ 'btn-danger' if is_liked else 'btn-outline-danger' }} btn-action"
+                            onclick="toggleLike({{ article.id }})" id="like-btn">
+                        <i class="bi {{ 'bi-heart-fill' if is_liked else 'bi-heart' }}"></i>
+                        <span id="like-count">{{ article.like_count }}</span>
+                    </button>
+                    <button class="btn {{ 'btn-warning' if is_bookmarked else 'btn-outline-warning' }} btn-action"
+                            onclick="toggleBookmark({{ article.id }})" id="bookmark-btn">
+                        <i class="bi {{ 'bi-star-fill' if is_bookmarked else 'bi-star' }}"></i>
+                        <span id="bookmark-count">{{ article.bookmark_count }}</span>
+                    </button>
+                    <button class="btn btn-outline-secondary btn-action" data-bs-toggle="modal" data-bs-target="#reportModal">
+                        <i class="bi bi-flag"></i> {{ t('article_report') }}
+                    </button>
+                    {% if current_user.id == article.author_id or current_user.is_admin %}
+                    <a href="/editor/{{ article.id }}" class="btn btn-outline-primary btn-action">
+                        <i class="bi bi-pencil"></i> {{ t('article_edit') }}
+                    </a>
+                    {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- 评论区 -->
+        <div class="card mt-4" id="comments-section">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-chat-dots"></i> {{ t('comments') }} ({{ article.comment_count }})</h5>
+            </div>
+            <div class="card-body">
+                {% if current_user.is_authenticated %}
+                <div class="comment-form mb-4">
+                    <form onsubmit="return submitComment({{ article.id }})">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <div class="mb-2">
+                            <textarea class="form-control" id="comment-input" name="content"
+                                      rows="3" placeholder="{{ t('comment_placeholder') }}" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-sm">{{ t('comment_submit') }}</button>
+                    </form>
+                </div>
+                {% else %}
+                <div class="text-center py-3 text-muted">
+                    <a href="/login">{{ t('login') }}</a> {{ t('comment_login_required') }}
+                </div>
+                {% endif %}
+
+                <div id="comments-list">
+                {% for comment in comments %}
+                <div class="comment-item mb-3 pb-3 border-bottom" id="comment-{{ comment.id }}">
+                    <div class="d-flex">
+                        <img src="{{ comment.user.avatar or '/static/uploads/default_avatar.png' }}" class="avatar-sm me-2" alt="">
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <a href="/user/{{ comment.user.id }}" class="fw-bold text-decoration-none">{{ comment.user.username }}</a>
+                                    <small class="text-muted ms-2">{{ comment.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                                </div>
+                                {% if current_user.is_authenticated and (current_user.id == comment.user_id or current_user.is_admin) %}
+                                <button class="btn btn-sm btn-link text-muted" onclick="deleteComment({{ comment.id }})">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                                {% endif %}
+                            </div>
+                            <p class="mb-1 mt-1">{{ comment.content }}</p>
+                            {% if current_user.is_authenticated %}
+                            <button class="btn btn-sm btn-link text-muted p-0" onclick="showReplyForm({{ comment.id }}, {{ comment.user.id }})">
+                                <i class="bi bi-reply"></i> {{ t('comment_reply') }}
+                            </button>
+                            {% endif %}
+                            <div class="reply-form d-none mt-2" id="reply-form-{{ comment.id }}">
+                                <form onsubmit="return submitComment({{ article.id }}, {{ comment.id }}, {{ comment.user.id }})">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <div class="input-group input-group-sm">
+                                        <input type="text" class="form-control" id="reply-input-{{ comment.id }}"
+                                               placeholder="{{ t('comment_reply') }} {{ comment.user.username }}...">
+                                        <button type="submit" class="btn btn-primary">{{ t('comment_reply') }}</button>
+                                    </div>
+                                </form>
+                            </div>
+                            {% for reply in comment.replies.filter_by(is_deleted=False).all() %}
+                            <div class="ms-3 mt-2 p-2 bg-light rounded" id="comment-{{ reply.id }}">
+                                <div class="d-flex align-items-start">
+                                    <img src="{{ reply.user.avatar or '/static/uploads/default_avatar.png' }}" class="avatar-xs me-2 mt-1" alt="">
+                                    <div>
+                                        <div>
+                                            <a href="/user/{{ reply.user.id }}" class="fw-bold text-decoration-none small">{{ reply.user.username }}</a>
+                                            {% if reply.reply_to_user %}
+                                            <span class="text-muted"> {{ t('comment_reply') }} </span>
+                                            <a href="/user/{{ reply.reply_to_user.id }}" class="fw-bold text-decoration-none small">{{ reply.reply_to_user.username }}</a>
+                                            {% endif %}
+                                            <small class="text-muted ms-1">{{ reply.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                                        </div>
+                                        <p class="mb-0 mt-1 small">{{ reply.content }}</p>
+                                        {% if current_user.is_authenticated %}
+                                        <button class="btn btn-sm btn-link text-muted p-0 small"
+                                                onclick="showReplyForm({{ comment.id }}, {{ reply.user.id }})">
+                                            {{ t('comment_reply') }}
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 侧边栏 -->
+    <div class="col-lg-3">
+        <div class="card sidebar-card mb-3">
+            <div class="card-body text-center">
+                <img src="{{ article.author.avatar or '/static/uploads/default_avatar.png' }}" class="avatar-lg mb-2" alt="">
+                <h6 class="mb-1">
+                    <a href="/user/{{ article.author.id }}" class="text-decoration-none">{{ article.author.username }}</a>
+                </h6>
+                <p class="text-muted small mb-2">{{ article.author.signature }}</p>
+                <div class="d-flex justify-content-around text-center">
+                    <div><strong>{{ article.author.article_count }}</strong><br><small class="text-muted">{{ t('articles') }}</small></div>
+                    <div><strong>{{ article.author.follower_count }}</strong><br><small class="text-muted">{{ t('followers') }}</small></div>
+                    <div><strong>{{ article.author.following_count }}</strong><br><small class="text-muted">{{ t('following') }}</small></div>
+                </div>
+                {% if current_user.is_authenticated and current_user.id != article.author.id %}
+                <button class="btn btn-sm {{ 'btn-secondary' if is_following|default(false) else 'btn-primary' }} w-100 mt-2"
+                        onclick="toggleFollow({{ article.author.id }})" id="follow-btn">
+                    {{ t('unfollow') if is_following|default(false) else t('follow') }}
+                </button>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if current_user.is_authenticated and (current_user.id == article.author_id or current_user.is_admin) %}
+        <div class="card sidebar-card">
+            <div class="card-header"><i class="bi bi-clock-history"></i> {{ t('article_versions') }}</div>
+            <div class="card-body" id="versions-list">
+                <small class="text-muted">...</small>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- 举报弹窗 -->
+<div class="modal fade" id="reportModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form onsubmit="return submitReport({{ article.id }})">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="modal-header">
+                    <h5 class="modal-title">{{ t('article_report_title') }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">{{ t('article_report_reason') }}</label>
+                        <textarea class="form-control" name="reason" rows="3" required placeholder="{{ t('article_report_placeholder') }}"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ t('article_report_cancel') }}</button>
+                    <button type="submit" class="btn btn-danger">{{ t('article_report_submit') }}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+{% if current_user.is_authenticated and (current_user.id == article.author_id or current_user.is_admin) %}
+fetch('/article/{{ article.id }}/versions').then(r=>r.json()).then(data => {
+    const el = document.getElementById('versions-list');
+    if (data.length === 0) { el.innerHTML = '<small class="text-muted">{{ t("article_no_versions") }}</small>'; return; }
+    el.innerHTML = data.map(v => `<div class="mb-1"><a href="#" class="text-decoration-none small">v${v.version_number}</a> <small class="text-muted">${new Date(v.created_at).toLocaleString()}</small></div>`).join('');
+});
+{% endif %}
+</script>
+{% endblock %}

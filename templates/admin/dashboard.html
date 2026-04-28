@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block title %}{{ t('admin_dashboard') }}{% endblock %}
+
+{% block content %}
+<h3 class="mb-4"><i class="bi bi-shield-check"></i> {{ t('admin_dashboard') }}</h3>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-2">
+        <div class="card text-center p-3">
+            <h2 class="mb-0 text-primary">{{ stats.users }}</h2>
+            <small class="text-muted">{{ t('admin_stats_users') }}</small>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card text-center p-3">
+            <h2 class="mb-0 text-success">{{ stats.published }}</h2>
+            <small class="text-muted">{{ t('admin_stats_published') }}</small>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card text-center p-3">
+            <h2 class="mb-0 text-warning">{{ stats.drafts }}</h2>
+            <small class="text-muted">{{ t('admin_stats_drafts') }}</small>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card text-center p-3">
+            <h2 class="mb-0 text-info">{{ stats.articles }}</h2>
+            <small class="text-muted">{{ t('admin_stats_total') }}</small>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card text-center p-3">
+            <h2 class="mb-0 text-secondary">{{ stats.comments }}</h2>
+            <small class="text-muted">{{ t('admin_stats_comments') }}</small>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card text-center p-3">
+            <h2 class="mb-0 text-danger">{{ stats.reports }}</h2>
+            <small class="text-muted">{{ t('admin_stats_pending_reports') }}</small>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex gap-2">
+            <a href="/admin/articles" class="btn btn-outline-primary"><i class="bi bi-file-text"></i> {{ t('admin_content') }}</a>
+            <a href="/admin/users" class="btn btn-outline-primary"><i class="bi bi-people"></i> {{ t('admin_users') }}</a>
+            <a href="/admin/reports" class="btn btn-outline-primary"><i class="bi bi-flag"></i> {{ t('admin_reports') }}</a>
+            <a href="/admin/categories" class="btn btn-outline-primary"><i class="bi bi-folder"></i> {{ t('admin_categories') }}</a>
+            <a href="/admin/settings" class="btn btn-outline-primary"><i class="bi bi-gear"></i> {{ t('admin_site_settings') }}</a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-file-text"></i> {{ t('admin_recent_articles') }}</div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    {% for article in recent_articles %}
+                    <tr>
+                        <td class="ps-3">
+                            <a href="/article/{{ article.id }}" class="text-decoration-none">{{ article.title[:30] }}</a>
+                        </td>
+                        <td class="text-end pe-3">
+                            <span class="badge bg-{{ 'success' if article.status == 'published' else ('warning' if article.status == 'draft' else 'danger') }}">
+                                {{ t('admin_status_' + article.status) if t('admin_status_' + article.status) != 'admin_status_' + article.status else article.status }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-people"></i> {{ t('admin_recent_users') }}</div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    {% for user in recent_users %}
+                    <tr>
+                        <td class="ps-3">
+                            <img src="{{ user.avatar or '/static/uploads/default_avatar.png' }}" class="avatar-xs me-1" alt="">
+                            <a href="/user/{{ user.id }}" class="text-decoration-none">{{ user.username }}</a>
+                        </td>
+                        <td class="text-end pe-3">
+                            <span class="badge bg-{{ 'danger' if user.role == 'admin' else ('primary' if user.role == 'creator' else 'secondary') }}">
+                                {{ t('admin_role_' + user.role) }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if pending_reports %}
+<div class="card mt-4">
+    <div class="card-header"><i class="bi bi-flag text-danger"></i> {{ t('admin_pending_reports') }}</div>
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead><tr><th>ID</th><th>{{ t('article_report_reason') }}</th><th>{{ t('admin_recent_users') }}</th><th></th><th></th></tr></thead>
+            <tbody>
+            {% for report in pending_reports %}
+            <tr>
+                <td>
+                    {% if report.article_id %}
+                    <a href="/article/{{ report.article_id }}" class="text-decoration-none">#{{ report.article_id }}</a>
+                    {% elif report.comment_id %}
+                    #{{ report.comment_id }}
+                    {% endif %}
+                </td>
+                <td>{{ report.reason[:30] }}</td>
+                <td>{{ report.reporter.username if report.reporter else '-' }}</td>
+                <td>{{ report.created_at.strftime('%m-%d %H:%M') }}</td>
+                <td>
+                    <form method="post" action="/admin/report/{{ report.id }}/resolve" class="d-inline">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button class="btn btn-sm btn-danger" name="action" value="resolve">{{ t('admin_remove') }}</button>
+                        <button class="btn btn-sm btn-secondary" name="action" value="reject">{{ t('admin_reject') }}</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

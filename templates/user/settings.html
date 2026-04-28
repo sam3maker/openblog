@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}{{ t('user_settings') }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-6 mx-auto">
+        <h3 class="mb-4"><i class="bi bi-gear"></i> {{ t('user_settings') }}</h3>
+        <form method="post" enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">{{ t('user_basic_info') }}</h5>
+                    <div class="mb-3 text-center">
+                        <img src="{{ current_user.avatar or '/static/uploads/default_avatar.png' }}" class="avatar-lg" id="avatar-preview" alt="">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">{{ t('user_avatar') }}</label>
+                        <input type="file" class="form-control" name="avatar" accept="image/*" onchange="previewAvatar(this)">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">{{ t('username') }}</label>
+                        <input type="text" class="form-control" name="username" value="{{ current_user.username }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">{{ t('email') }}</label>
+                        <input type="email" class="form-control" value="{{ current_user.email }}" disabled>
+                        <small class="text-muted">{{ t('user_email_immutable') }}</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">{{ t('user_signature') }}</label>
+                        <input type="text" class="form-control" name="signature" value="{{ current_user.signature }}" maxlength="200" placeholder="{{ t('user_signature_placeholder') }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">{{ t('user_bio') }}</label>
+                        <textarea class="form-control" name="bio" rows="4" maxlength="500" placeholder="{{ t('user_bio_placeholder') }}">{{ current_user.bio }}</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-check"></i> {{ t('user_save') }}</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function previewAvatar(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = e => document.getElementById('avatar-preview').src = e.target.result;
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+</script>
+{% endblock %}

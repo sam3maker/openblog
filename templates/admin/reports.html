@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}{{ t('admin_reports') }}{% endblock %}
+
+{% block content %}
+<h3 class="mb-4"><i class="bi bi-flag"></i> {{ t('admin_reports') }}</h3>
+
+<div class="d-flex gap-2 mb-3">
+    <a href="/admin/reports?status=pending" class="btn {{ 'btn-primary' if status == 'pending' else 'btn-outline-primary' }} btn-sm">{{ t('admin_report_pending') }}</a>
+    <a href="/admin/reports?status=resolved" class="btn {{ 'btn-primary' if status == 'resolved' else 'btn-outline-primary' }} btn-sm">{{ t('admin_report_resolved') }}</a>
+    <a href="/admin/reports?status=rejected" class="btn {{ 'btn-primary' if status == 'rejected' else 'btn-outline-primary' }} btn-sm">{{ t('admin_report_rejected') }}</a>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead><tr>
+                <th>ID</th><th>{{ t('status_published') }}</th><th>{{ t('username') }}</th><th>{{ t('article_report_reason') }}</th><th>{{ t('status_draft') }}</th><th></th><th></th>
+            </tr></thead>
+            <tbody>
+            {% for report in reports %}
+            <tr>
+                <td>{{ report.id }}</td>
+                <td>
+                    {% if report.article_id %}
+                    <a href="/article/{{ report.article_id }}" class="text-decoration-none">#{{ report.article_id }}</a>
+                    {% elif report.comment_id %}
+                    Comment #{{ report.comment_id }}
+                    {% endif %}
+                </td>
+                <td>{{ report.reporter.username if report.reporter else '-' }}</td>
+                <td>{{ report.reason[:40] }}</td>
+                <td>
+                    <span class="badge bg-{{ 'warning' if report.status == 'pending' else ('success' if report.status == 'resolved' else 'secondary') }}">
+                        {{ t('admin_report_' + report.status) }}
+                    </span>
+                </td>
+                <td>{{ report.created_at.strftime('%m-%d %H:%M') }}</td>
+                <td>
+                    {% if report.status == 'pending' %}
+                    <form method="post" action="/admin/report/{{ report.id }}/resolve" class="d-inline">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button class="btn btn-sm btn-danger" name="action" value="resolve">{{ t('admin_remove') }}</button>
+                        <button class="btn btn-sm btn-secondary" name="action" value="reject">{{ t('admin_reject') }}</button>
+                    </form>
+                    {% else %}
+                    <span class="text-muted">-</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

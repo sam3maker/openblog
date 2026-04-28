@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}{{ profile_user.username }} - {{ t('followers') if tab == 'followers' else t('following') }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-6 mx-auto">
+        <h3 class="mb-4">
+            <a href="/user/{{ profile_user.id }}" class="text-decoration-none">{{ profile_user.username }}</a>
+            - {{ t('followers') if tab == 'followers' else t('following') }}
+        </h3>
+        <ul class="nav nav-tabs mb-3">
+            <li class="nav-item">
+                <a class="nav-link {{ 'active' if tab == 'followers' else '' }}" href="/user/{{ profile_user.id }}/followers?tab=followers">{{ t('followers') }}</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ 'active' if tab == 'following' else '' }}" href="/user/{{ profile_user.id }}/followers?tab=following">{{ t('following') }}</a>
+            </li>
+        </ul>
+        {% for follow in pagination.items %}
+        {% set user = follow.follower if tab == 'followers' else follow.followed %}
+        <div class="card mb-2">
+            <div class="card-body d-flex align-items-center py-2">
+                <a href="/user/{{ user.id }}" class="text-decoration-none d-flex align-items-center flex-grow-1">
+                    <img src="{{ user.avatar or '/static/uploads/default_avatar.png' }}" class="avatar-sm me-2" alt="">
+                    <div>
+                        <strong>{{ user.username }}</strong>
+                        <br><small class="text-muted">{{ user.signature[:50] if user.signature else '' }}</small>
+                    </div>
+                </a>
+                {% if current_user.is_authenticated and user.id != current_user.id %}
+                <button class="btn btn-sm {{ 'btn-secondary' if current_user.is_following(user) else 'btn-outline-primary' }}"
+                        onclick="toggleFollow({{ user.id }}, this)">
+                    {{ t('unfollow') if current_user.is_following(user) else t('follow') }}
+                </button>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+        {% if not pagination.items %}
+        <div class="text-center py-4 text-muted">{{ t('no_articles') }}</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

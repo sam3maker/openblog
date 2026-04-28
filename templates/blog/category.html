@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}{{ category.name }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <div class="d-flex align-items-center mb-4">
+            <h3><i class="bi bi-folder"></i> {{ category.name }}</h3>
+            <span class="badge bg-secondary ms-2">{{ articles|length }} {{ t('articles') }}</span>
+        </div>
+        {% if category.description %}
+        <p class="text-muted mb-4">{{ category.description }}</p>
+        {% endif %}
+        {% for article in articles %}
+        <div class="card article-card mb-3">
+            <div class="card-body">
+                <div class="d-flex">
+                    <div class="flex-grow-1">
+                        <h5 class="card-title">
+                            <a href="/article/{{ article.id }}" class="text-decoration-none">{{ article.title }}</a>
+                        </h5>
+                        <p class="card-text text-muted summary">{{ article.summary[:120] }}...</p>
+                        <div class="article-meta d-flex align-items-center gap-3">
+                            <span class="text-muted"><i class="bi bi-clock"></i> {{ article.published_at.strftime('%Y-%m-%d') if article.published_at else '' }}</span>
+                            <span class="text-muted"><i class="bi bi-eye"></i> {{ article.view_count }}</span>
+                            <span class="text-muted"><i class="bi bi-heart"></i> {{ article.like_count }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

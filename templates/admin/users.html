@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}{{ t('admin_users') }}{% endblock %}
+
+{% block content %}
+<h3 class="mb-4"><i class="bi bi-people"></i> {{ t('admin_users') }}</h3>
+
+<div class="d-flex gap-2 mb-3">
+    <a href="/admin/users" class="btn {{ 'btn-primary' if not role else 'btn-outline-primary' }} btn-sm">{{ t('all') }}</a>
+    <a href="/admin/users?role=user" class="btn {{ 'btn-primary' if role == 'user' else 'btn-outline-primary' }} btn-sm">{{ t('admin_role_user') }}</a>
+    <a href="/admin/users?role=creator" class="btn {{ 'btn-primary' if role == 'creator' else 'btn-outline-primary' }} btn-sm">{{ t('admin_role_creator') }}</a>
+    <a href="/admin/users?role=admin" class="btn {{ 'btn-primary' if role == 'admin' else 'btn-outline-primary' }} btn-sm">{{ t('admin_role_admin') }}</a>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead><tr>
+                <th>ID</th><th>{{ t('username') }}</th><th>{{ t('email') }}</th><th>{{ t('language') }}</th><th>{{ t('articles') }}</th><th>{{ t('status_draft') }}</th><th></th><th></th>
+            </tr></thead>
+            <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.id }}</td>
+                <td>
+                    <img src="{{ user.avatar or '/static/uploads/default_avatar.png' }}" class="avatar-xs me-1" alt="">
+                    <a href="/user/{{ user.id }}" class="text-decoration-none">{{ user.username }}</a>
+                </td>
+                <td>{{ user.email }}</td>
+                <td>
+                    <select class="form-select form-select-sm" style="width:auto" onchange="changeRole({{ user.id }}, this.value)">
+                        <option value="user" {{ 'selected' if user.role == 'user' }}>{{ t('admin_role_user') }}</option>
+                        <option value="creator" {{ 'selected' if user.role == 'creator' }}>{{ t('admin_role_creator') }}</option>
+                        <option value="admin" {{ 'selected' if user.role == 'admin' }}>{{ t('admin_role_admin') }}</option>
+                    </select>
+                </td>
+                <td>{{ user.article_count }}</td>
+                <td>
+                    <span class="badge bg-{{ 'success' if user.is_active else 'danger' }}">
+                        {{ t('admin_status_normal') if user.is_active else t('admin_status_disabled') }}
+                    </span>
+                </td>
+                <td>{{ user.created_at.strftime('%Y-%m-%d') }}</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-{{ 'danger' if user.is_active else 'success' }}"
+                            onclick="toggleActive({{ user.id }})">
+                        {{ t('admin_disable') if user.is_active else t('admin_enable') }}
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function changeRole(id, role) {
+    const form = new FormData();
+    form.append('csrf_token', '{{ csrf_token() }}');
+    form.append('role', role);
+    fetch(`/admin/user/${id}/role`, {method:'POST', body: form})
+    .then(r => r.json()).then(d => { if(d.success) showToast('{{ t("toast_save_success") }}'); });
+}
+function toggleActive(id) {
+    const form = new FormData();
+    form.append('csrf_token', '{{ csrf_token() }}');
+    fetch(`/admin/user/${id}/toggle_active`, {method:'POST', body: form})
+    .then(r => r.json()).then(() => location.reload());
+}
+</script>
+{% endblock %}

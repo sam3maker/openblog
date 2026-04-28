@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}{{ t('register') }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card auth-card">
+            <div class="card-body p-4">
+                <h3 class="text-center mb-4"><i class="bi bi-person-plus"></i> {{ t('register') }}</h3>
+                <form method="post">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-3">
+                        <label class="form-label">{{ t('username') }}</label>
+                        <input type="text" class="form-control" name="username" required
+                               minlength="3" maxlength="20" placeholder="{{ t('username_rules') }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">{{ t('email') }}</label>
+                        <input type="email" class="form-control" name="email" required placeholder="{{ t('email_placeholder') }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">{{ t('password') }}</label>
+                        <input type="password" class="form-control" name="password" required
+                               minlength="6" placeholder="{{ t('password_rules') }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">{{ t('confirm_password') }}</label>
+                        <input type="password" class="form-control" name="confirm" required placeholder="{{ t('confirm_password') }}">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 mb-3">{{ t('register') }}</button>
+
+                    {% if github_enabled %}
+                    <a href="/github" class="btn btn-dark w-100 mb-3">
+                        <i class="bi bi-github"></i> {{ t('github_register') }}
+                    </a>
+                    {% endif %}
+
+                    <div class="text-center">
+                        {{ t('has_account') }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

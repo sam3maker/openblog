@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}{{ t('admin_site_settings') }}{% endblock %}
+
+{% block content %}
+<h3 class="mb-4"><i class="bi bi-gear"></i> {{ t('admin_site_settings') }}</h3>
+<form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">{{ t('admin_basic_settings') }}</h5>
+                    <div class="mb-3">
+                        <label class="form-label">{{ t('admin_site_name') }}</label>
+                        <input type="text" class="form-control" name="site_name" value="{{ config.site_name }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">{{ t('admin_site_logo') }}</label>
+                        <input type="text" class="form-control" name="site_logo" value="{{ config.site_logo }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">{{ t('admin_site_description') }}</label>
+                        <textarea class="form-control" name="site_description" rows="2">{{ config.site_description }}</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">{{ t('admin_site_notice') }}</label>
+                        <textarea class="form-control" name="site_notice" rows="3">{{ config.site_notice }}</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">{{ t('admin_site_footer') }}</label>
+                        <textarea class="form-control" name="site_footer" rows="2">{{ config.site_footer }}</textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">GitHub OAuth</h5>
+                    <div class="mb-3">
+                        <label class="form-label">Client ID</label>
+                        <input type="text" class="form-control" name="github_client_id" value="{{ config.github_client_id }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Client Secret</label>
+                        <input type="password" class="form-control" name="github_client_secret" value="{{ config.github_client_secret }}">
+                    </div>
+                    <small class="text-muted">
+                        <a href="https://github.com/settings/developers" target="_blank">GitHub Developer Settings</a>
+                    </small>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary w-100"><i class="bi bi-check"></i> {{ t('admin_save_settings') }}</button>
+        </div>
+    </div>
+</form>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}{{ t('login') }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card auth-card">
+            <div class="card-body p-4">
+                <h3 class="text-center mb-4"><i class="bi bi-box-arrow-in-right"></i> {{ t('login') }}</h3>
+                <form method="post">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-3">
+                        <label class="form-label">{{ t('username') }}</label>
+                        <input type="text" class="form-control" name="username" required placeholder="{{ t('username_placeholder') }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">{{ t('password') }}</label>
+                        <input type="password" class="form-control" name="password" required placeholder="{{ t('password_placeholder') }}">
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" name="remember" id="remember">
+                        <label class="form-check-label" for="remember">{{ t('remember_me') }}</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 mb-3">{{ t('login') }}</button>
+
+                    {% if github_enabled %}
+                    <a href="/github" class="btn btn-dark w-100 mb-3">
+                        <i class="bi bi-github"></i> {{ t('github_login') }}
+                    </a>
+                    {% endif %}
+
+                    <div class="text-center">
+                        <a href="/reset_password" class="text-muted">{{ t('forgot_password') }}</a>
+                        <span class="mx-2">|</span>
+                        <a href="/register">{{ t('no_account') }}</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

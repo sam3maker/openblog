@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}{{ t('admin_content') }}{% endblock %}
+
+{% block content %}
+<h3 class="mb-4"><i class="bi bi-file-text"></i> {{ t('admin_content') }}</h3>
+
+<div class="d-flex gap-2 mb-3">
+    <a href="/admin/articles" class="btn {{ 'btn-primary' if not status else 'btn-outline-primary' }} btn-sm">{{ t('all') }}</a>
+    <a href="/admin/articles?status=published" class="btn {{ 'btn-primary' if status == 'published' else 'btn-outline-primary' }} btn-sm">{{ t('admin_status_published') }}</a>
+    <a href="/admin/articles?status=draft" class="btn {{ 'btn-primary' if status == 'draft' else 'btn-outline-primary' }} btn-sm">{{ t('admin_status_draft') }}</a>
+    <a href="/admin/articles?status=removed" class="btn {{ 'btn-primary' if status == 'removed' else 'btn-outline-primary' }} btn-sm">{{ t('admin_status_removed') }}</a>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead><tr>
+                <th>ID</th><th>{{ t('articles') }}</th><th>{{ t('username') }}</th><th>{{ t('status_draft') }}</th><th>{{ t('view_count') }}</th><th>{{ t('like_count') }}</th><th></th><th></th>
+            </tr></thead>
+            <tbody>
+            {% for article in articles %}
+            <tr>
+                <td>{{ article.id }}</td>
+                <td><a href="/article/{{ article.id }}" class="text-decoration-none">{{ article.title[:30] }}</a></td>
+                <td>{{ article.author.username }}</td>
+                <td>
+                    <span class="badge bg-{{ 'success' if article.status == 'published' else ('warning' if article.status == 'draft' else 'danger') }}">
+                        {{ t('admin_status_' + article.status) if t('admin_status_' + article.status) != 'admin_status_' + article.status else article.status }}
+                    </span>
+                    {% if article.is_featured %}<span class="badge bg-danger">{{ t('admin_pin') }}</span>{% endif %}
+                </td>
+                <td>{{ article.view_count }}</td>
+                <td>{{ article.like_count }}</td>
+                <td>{{ article.created_at.strftime('%Y-%m-%d') }}</td>
+                <td>
+                    <div class="btn-group btn-group-sm">
+                        {% if article.status != 'removed' %}
+                        <button class="btn btn-outline-warning" onclick="toggleArticle({{ article.id }}, 'remove')" title="{{ t('admin_remove') }}">
+                            <i class="bi bi-x-circle"></i>
+                        </button>
+                        {% else %}
+                        <button class="btn btn-outline-success" onclick="toggleArticle({{ article.id }}, 'publish')" title="{{ t('admin_restore') }}">
+                            <i class="bi bi-check-circle"></i>
+                        </button>
+                        {% endif %}
+                        <button class="btn btn-outline-{{ 'secondary' if article.is_featured else 'info' }}"
+                                onclick="toggleArticle({{ article.id }}, 'feature')" title="{{ t('admin_pin') }}">
+                            <i class="bi bi-{{ 'star-fill' if article.is_featured else 'star' }}"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleArticle(id, action) {
+    const form = new FormData();
+    form.append('csrf_token', '{{ csrf_token() }}');
+    form.append('action', action);
+    fetch(`/admin/article/${id}/toggle`, {method:'POST', body: form})
+    .then(r => r.json()).then(() => location.reload());
+}
+</script>
+{% endblock %}
