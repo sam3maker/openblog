@@ -37,8 +37,8 @@ A full-featured open source blog platform with Markdown/rich-text dual editor, c
 
 **1. Clone the repository**
 ```bash
-git clone https://github.com/your-username/blog.git
-cd blog
+git clone https://github.com/sam3maker/openblog.git
+cd openblog
 ```
 
 **2. Create environment file**
@@ -59,7 +59,7 @@ Visit http://localhost:5000
 
 ### Deploy to Koyeb (Free)
 
-[![Deploy to Koyeb](https://www.koyeb.com/deploy/button.svg)](https://app.koyeb.com/deploy?type=git&repository=github.com/your-username/blog&branch=main&builder=buildpack&run_command=gunicorn%20run:app&ports=5000;http;/)
+[![Deploy to Koyeb](https://www.koyeb.com/deploy/button.svg)](https://app.koyeb.com/deploy?type=git&repository=github.com/sam3maker/openblog&branch=main&builder=buildpack&run_command=gunicorn%20run:app&ports=5000;http;/)
 
 1. Fork or push this repo to your GitHub
 2. Sign up at [koyeb.com](https://koyeb.com) (free, no credit card required)
@@ -95,7 +95,7 @@ Visit http://localhost:5000
 ### Project Structure
 
 ```
-blog/
+openblog/
 ├── app/                    # Flask application
 │   ├── config.py           # Configuration
 │   ├── models.py           # Database models (13 tables)
@@ -151,8 +151,8 @@ blog/
 
 **1. 克隆仓库**
 ```bash
-git clone https://github.com/your-username/blog.git
-cd blog
+git clone https://github.com/sam3maker/openblog.git
+cd openblog
 ```
 
 **2. 创建环境文件**
@@ -229,8 +229,8 @@ Markdown・リッチテキストデュアルエディタ、コミュニティ機
 ### クイックスタート
 
 ```bash
-git clone https://github.com/your-username/blog.git
-cd blog
+git clone https://github.com/sam3maker/openblog.git
+cd openblog
 cp .env.example .env
 # .env ファイルを編集してデータベース情報を入力
 pip install -r requirements.txt
@@ -270,8 +270,8 @@ Markdown/리치 텍스트 듀얼 에디터, 커뮤니티, 관리 패널, 다국�
 ### 빠른 시작
 
 ```bash
-git clone https://github.com/your-username/blog.git
-cd blog
+git clone https://github.com/sam3maker/openblog.git
+cd openblog
 cp .env.example .env
 # .env 파일을 편집하여 데이터베이스 정보를 입력
 pip install -r requirements.txt
