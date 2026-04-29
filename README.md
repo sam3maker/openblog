@@ -57,15 +57,6 @@ Visit http://localhost:5000
 
 > The admin account is created automatically on first run. Set the password via the `ADMIN_PASSWORD` environment variable.
 
-### Deploy to Back4app (Free)
-
-1. Push this repo to your GitHub
-2. Sign up at [back4app.com](https://www.back4app.com) (free, no credit card)
-3. Go to **Containers** → **New App** → **Deploy from GitHub**
-4. Select `sam3maker/openblog` repo
-5. Add environment variables (see table below)
-6. Deploy! Your site will be live at `xxx.back4app.com`
-
 ### Tech Stack
 
 | Layer | Technology |
@@ -168,15 +159,6 @@ python run.py
 
 > 管理员账号在首次运行时自动创建。通过 `ADMIN_PASSWORD` 环境变量设置密码。
 
-### 部署到 Back4app（免费）
-
-1. 推送此仓库到你的 GitHub
-2. 在 [back4app.com](https://www.back4app.com) 注册（免费，无需信用卡）
-3. 进入 **Containers** → **New App** → **Deploy from GitHub**
-4. 选择 `sam3maker/openblog` 仓库
-5. 添加环境变量（参考上表）
-6. 部署！你的站点将上线于 `xxx.back4app.com`
-
 ### 环境变量
 
 | 变量名 | 必填 | 说明 |
@@ -235,15 +217,6 @@ python run.py
 
 http://localhost:5000 にアクセス
 
-### Back4app にデプロイ（無料）
-
-1. このリポジトリを GitHub にプッシュ
-2. [back4app.com](https://www.back4app.com) に登録（無料、クレジットカード不要）
-3. **Containers** → **New App** → **Deploy from GitHub**
-4. `sam3maker/openblog` リポジトリを選択
-5. 環境変数を設定
-6. デプロイ！`xxx.back4app.com` で公開
-
 ---
 
 <a id="한국어-문서"></a>
@@ -274,15 +247,6 @@ python run.py
 ```
 
 http://localhost:5000 접속
-
-### Back4app에 배포 (무료)
-
-1. 이 저장소를 GitHub에 푸시
-2. [back4app.com](https://www.back4app.com) 가입 (무료, 신용카드 불필요)
-3. **Containers** → **New App** → **Deploy from GitHub**
-4. `sam3maker/openblog` 저장소 선택
-5. 환경변수 설정
-6. 배포! `xxx.back4app.com`에서 접속 가능
 
 ---
 
