@@ -57,18 +57,15 @@ Visit http://localhost:5000
 
 > The admin account is created automatically on first run. Set the password via the `ADMIN_PASSWORD` environment variable.
 
-### Deploy to Render (Free)
+### Deploy to SnapDeploy (Free)
 
 1. Push this repo to your GitHub
-2. Sign up at [render.com](https://render.com) (free, no credit card)
-3. Click **New** → **Web Service** → Connect your GitHub repo
-4. Configure:
-   - **Build Command**: `pip install -r requirements.txt`
-   - **Start Command**: `gunicorn run:app`
-5. Add environment variables (see table below)
-6. Deploy! Your site will be live at `xxx.onrender.com`
+2. Sign up at [snapdeploy.dev](https://snapdeploy.dev) (free, no credit card)
+3. Click **Deploy a Template** → select Flask, then connect your GitHub repo
+4. Add environment variables (see table below)
+5. Deploy! Your site will be live at `xxx.snapdeploy.dev`
 
-> Note: Free tier sleeps after 15 min of inactivity. It wakes up automatically on the next request.
+> Free tier auto-sleeps when idle and auto-wakes in 10-30 seconds on new requests.
 
 ### Tech Stack
 
@@ -172,18 +169,15 @@ python run.py
 
 > 管理员账号在首次运行时自动创建。通过 `ADMIN_PASSWORD` 环境变量设置密码。
 
-### 部署到 Render（免费）
+### 部署到 SnapDeploy（免费）
 
 1. 推送此仓库到你的 GitHub
-2. 在 [render.com](https://render.com) 注册（免费，无需信用卡）
-3. 点击 **New** → **Web Service** → 连接你的 GitHub 仓库
-4. 配置：
-   - **Build Command**：`pip install -r requirements.txt`
-   - **Start Command**：`gunicorn run:app`
-5. 添加环境变量（参考上表）
-6. 部署！你的站点将上线于 `xxx.onrender.com`
+2. 在 [snapdeploy.dev](https://snapdeploy.dev) 注册（免费，无需信用卡）
+3. 点击 **Deploy a Template** → 选择 Flask，然后连接你的 GitHub 仓库
+4. 添加环境变量（参考上表）
+5. 部署！你的站点将上线于 `xxx.snapdeploy.dev`
 
-> 注意：免费套餐在 15 分钟无访问后会休眠，下次请求时自动唤醒。
+> 免费套餐自动休眠，收到请求后 10-30 秒自动唤醒。
 
 ### 环境变量
 
@@ -243,14 +237,13 @@ python run.py
 
 http://localhost:5000 にアクセス
 
-### Render にデプロイ（無料）
+### SnapDeploy にデプロイ（無料）
 
 1. このリポジトリを GitHub にプッシュ
-2. [render.com](https://render.com) に登録（無料、クレジットカード不要）
-3. **New** → **Web Service** → GitHub リポジトリを接続
-4. ビルドコマンド：`pip install -r requirements.txt`、起動コマンド：`gunicorn run:app`
-5. 環境変数を設定
-6. デプロイ！`xxx.onrender.com` で公開
+2. [snapdeploy.dev](https://snapdeploy.dev) に登録（無料、クレジットカード不要）
+3. **Deploy a Template** → Flask を選択 → GitHub リポジトリを接続
+4. 環境変数を設定
+5. デプロイ！`xxx.snapdeploy.dev` で公開
 
 ---
 
@@ -283,14 +276,13 @@ python run.py
 
 http://localhost:5000 접속
 
-### Render에 배포 (무료)
+### SnapDeploy에 배포 (무료)
 
 1. 이 저장소를 GitHub에 푸시
-2. [render.com](https://render.com) 가입 (무료, 신용카드 불필요)
-3. **New** → **Web Service** → GitHub 저장소 연결
-4. 빌드 명령: `pip install -r requirements.txt`, 실행 명령: `gunicorn run:app`
-5. 환경변수 설정
-6. 배포! `xxx.onrender.com`에서 접속 가능
+2. [snapdeploy.dev](https://snapdeploy.dev) 가입 (무료, 신용카드 불필요)
+3. **Deploy a Template** → Flask 선택 → GitHub 저장소 연결
+4. 환경변수 설정
+5. 배포! `xxx.snapdeploy.dev`에서 접속 가능
 
 ---
 
