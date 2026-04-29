@@ -6,8 +6,7 @@
 .env.local
 .env.production
 
-# SSL certificates
-*.pem
+# Private keys (keep public certs like isrgrootx1.pem)
 *.key
 *.crt
 

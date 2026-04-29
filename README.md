@@ -55,19 +55,20 @@ python run.py
 
 Visit http://localhost:5000
 
-> The admin account is created automatically on first run. Set the password via the `ADMIN_PASSWORD` environment variable, or it defaults to a random password shown in the console.
+> The admin account is created automatically on first run. Set the password via the `ADMIN_PASSWORD` environment variable.
 
-### Deploy to Koyeb (Free)
+### Deploy to Render (Free)
 
-[![Deploy to Koyeb](https://www.koyeb.com/deploy/button.svg)](https://app.koyeb.com/deploy?type=git&repository=github.com/sam3maker/openblog&branch=main&builder=buildpack&run_command=gunicorn%20run:app&ports=5000;http;/)
+1. Push this repo to your GitHub
+2. Sign up at [render.com](https://render.com) (free, no credit card)
+3. Click **New** → **Web Service** → Connect your GitHub repo
+4. Configure:
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `gunicorn run:app`
+5. Add environment variables (see table below)
+6. Deploy! Your site will be live at `xxx.onrender.com`
 
-1. Fork or push this repo to your GitHub
-2. Sign up at [koyeb.com](https://koyeb.com) (free, no credit card required)
-3. Create a new Web Service → select GitHub repo
-4. Set build command: `pip install -r requirements.txt`
-5. Set run command: `gunicorn run:app`
-6. Add environment variables (see `.env.example`)
-7. Deploy!
+> Note: Free tier sleeps after 15 min of inactivity. It wakes up automatically on the next request.
 
 ### Tech Stack
 
@@ -169,17 +170,20 @@ python run.py
 
 访问 http://localhost:5000
 
-> 管理员账号在首次运行时自动创建。通过 `ADMIN_PASSWORD` 环境变量设置密码，否则使用控制台显示的随机密码。
+> 管理员账号在首次运行时自动创建。通过 `ADMIN_PASSWORD` 环境变量设置密码。
 
-### 部署到 Koyeb（免费）
+### 部署到 Render（免费）
 
-1. Fork 或推送此仓库到你的 GitHub
-2. 在 [koyeb.com](https://koyeb.com) 注册（免费，无需信用卡）
-3. 创建新的 Web Service → 选择 GitHub 仓库
-4. 构建命令：`pip install -r requirements.txt`
-5. 运行命令：`gunicorn run:app`
-6. 添加环境变量（参考 `.env.example`）
-7. 部署！
+1. 推送此仓库到你的 GitHub
+2. 在 [render.com](https://render.com) 注册（免费，无需信用卡）
+3. 点击 **New** → **Web Service** → 连接你的 GitHub 仓库
+4. 配置：
+   - **Build Command**：`pip install -r requirements.txt`
+   - **Start Command**：`gunicorn run:app`
+5. 添加环境变量（参考上表）
+6. 部署！你的站点将上线于 `xxx.onrender.com`
+
+> 注意：免费套餐在 15 分钟无访问后会休眠，下次请求时自动唤醒。
 
 ### 环境变量
 
@@ -239,15 +243,14 @@ python run.py
 
 http://localhost:5000 にアクセス
 
-### Koyeb にデプロイ（無料）
+### Render にデプロイ（無料）
 
-1. このリポジトリを GitHub にフォーク
-2. [koyeb.com](https://koyeb.com) に登録（無料、クレジットカード不要）
-3. 新しい Web Service を作成 → GitHub リポジトリを選択
-4. ビルドコマンド：`pip install -r requirements.txt`
-5. 実行コマンド：`gunicorn run:app`
-6. 環境変数を設定（`.env.example` を参照）
-7. デプロイ！
+1. このリポジトリを GitHub にプッシュ
+2. [render.com](https://render.com) に登録（無料、クレジットカード不要）
+3. **New** → **Web Service** → GitHub リポジトリを接続
+4. ビルドコマンド：`pip install -r requirements.txt`、起動コマンド：`gunicorn run:app`
+5. 環境変数を設定
+6. デプロイ！`xxx.onrender.com` で公開
 
 ---
 
@@ -280,15 +283,14 @@ python run.py
 
 http://localhost:5000 접속
 
-### Koyeb에 배포 (무료)
+### Render에 배포 (무료)
 
-1. 이 저장소를 GitHub에 포크
-2. [koyeb.com](https://koyeb.com) 가입 (무료, 신용카드 불필요)
-3. 새 Web Service 생성 → GitHub 저장소 선택
-4. 빌드 명령: `pip install -r requirements.txt`
-5. 실행 명령: `gunicorn run:app`
-6. 환경변수 설정 (`.env.example` 참조)
-7. 배포!
+1. 이 저장소를 GitHub에 푸시
+2. [render.com](https://render.com) 가입 (무료, 신용카드 불필요)
+3. **New** → **Web Service** → GitHub 저장소 연결
+4. 빌드 명령: `pip install -r requirements.txt`, 실행 명령: `gunicorn run:app`
+5. 환경변수 설정
+6. 배포! `xxx.onrender.com`에서 접속 가능
 
 ---
 
