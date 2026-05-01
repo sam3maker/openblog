@@ -9,6 +9,8 @@ pinned: false
 
 <div align="center">
 
+<img src="logo.png" alt="OpenBlog" width="200">
+
 # OpenBlog
 
 **Open Source Blog Platform | 开源博客平台**
