@@ -1,3 +1,12 @@
+---
+title: OpenBlog
+emoji: 📝
+colorFrom: blue
+colorTo: purple
+sdk: docker
+pinned: false
+---
+
 <div align="center">
 
 # OpenBlog
