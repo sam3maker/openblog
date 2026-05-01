@@ -92,6 +92,7 @@ Visit http://localhost:5000
 | `GITHUB_CLIENT_ID` | No | GitHub OAuth App ID |
 | `GITHUB_CLIENT_SECRET` | No | GitHub OAuth App Secret |
 | `ADMIN_PASSWORD` | No | Admin account password |
+| `MYSQL_SSL_CA_CONTENT` | No | SSL cert file content (for deployment without pem file) |
 
 ### Project Structure
 
@@ -189,6 +190,7 @@ python run.py
 | `GITHUB_CLIENT_ID` | 否 | GitHub OAuth App ID |
 | `GITHUB_CLIENT_SECRET` | 否 | GitHub OAuth App Secret |
 | `ADMIN_PASSWORD` | 否 | 管理员账号密码 |
+| `MYSQL_SSL_CA_CONTENT` | 否 | SSL 证书文件内容（用于无 pem 文件的部署环境） |
 
 ### 数据表
 
@@ -258,6 +260,7 @@ http://localhost:5000 にアクセス
 | `GITHUB_CLIENT_ID` | いいえ | GitHub OAuth App ID |
 | `GITHUB_CLIENT_SECRET` | いいえ | GitHub OAuth App シークレット |
 | `ADMIN_PASSWORD` | いいえ | 管理者アカウントのパスワード |
+| `MYSQL_SSL_CA_CONTENT` | いいえ | SSL証明書ファイルの内容（pemファイルなしのデプロイ用） |
 
 ### テクノロジースタック
 
@@ -323,6 +326,7 @@ http://localhost:5000 접속
 | `GITHUB_CLIENT_ID` | 아니오 | GitHub OAuth App ID |
 | `GITHUB_CLIENT_SECRET` | 아니오 | GitHub OAuth App 시크릿 |
 | `ADMIN_PASSWORD` | 아니오 | 관리자 계정 비밀번호 |
+| `MYSQL_SSL_CA_CONTENT` | 아니오 | SSL 인증서 파일 내용 (pem 파일 없는 배포용) |
 
 ### 기술 스택
 

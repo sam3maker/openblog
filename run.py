@@ -1,13 +1,23 @@
 #!/usr/bin/env python3
 """博客平台启动入口"""
 import os
+from pathlib import Path
 import pymysql
 from dotenv import load_dotenv
 
 load_dotenv()
 
 from app import create_app, db
-from app.config import Config
+from app.config import Config, BASE_DIR
+
+
+def ensure_ssl_cert():
+    """If MYSQL_SSL_CA_CONTENT env var is set, write it to isrgrootx1.pem"""
+    cert_content = os.environ.get('MYSQL_SSL_CA_CONTENT', '')
+    if cert_content:
+        cert_path = BASE_DIR / 'isrgrootx1.pem'
+        cert_path.write_text(cert_content)
+        print(f'SSL cert written to {cert_path}')
 
 
 def ensure_database():
@@ -54,6 +64,7 @@ def init_app():
 
 
 app = create_app()
+ensure_ssl_cert()
 init_app()
 
 if __name__ == '__main__':
