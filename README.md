@@ -56,7 +56,11 @@ cp .env.example .env
 # Edit .env with your database credentials
 ```
 
-**3. Install dependencies & run**
+**3. Download SSL certificate**
+
+This project uses TiDB Cloud, which requires an SSL certificate to connect. Register a free account at [TiDB Cloud](https://tidbcloud.com), create a cluster, and download the `isrgrootx1.pem` certificate from the cluster connection page. Place it in the project root directory.
+
+**4. Install dependencies & run**
 ```bash
 pip install -r requirements.txt
 python run.py
@@ -158,7 +162,11 @@ cp .env.example .env
 # 编辑 .env 填入你的数据库凭据
 ```
 
-**3. 安装依赖并运行**
+**3. 下载 SSL 证书**
+
+本项目使用 TiDB Cloud 数据库，连接需要 SSL 证书。请在 [TiDB Cloud](https://tidbcloud.com) 注册免费账号，创建集群后，在集群连接页面下载 `isrgrootx1.pem` 证书文件，放到项目根目录。
+
+**4. 安装依赖并运行**
 ```bash
 pip install -r requirements.txt
 python run.py
@@ -224,6 +232,11 @@ git clone https://github.com/sam3maker/openblog.git
 cd openblog
 cp .env.example .env
 # .env ファイルを編集してデータベース情報を入力
+```
+
+[TiDB Cloud](https://tidbcloud.com) で無料アカウントを登録し、クラスタを作成後、接続ページから `isrgrootx1.pem` 証明書をダウンロードしてプロジェクトルートに配置してください。
+
+```bash
 pip install -r requirements.txt
 python run.py
 ```
@@ -284,6 +297,11 @@ git clone https://github.com/sam3maker/openblog.git
 cd openblog
 cp .env.example .env
 # .env 파일을 편집하여 데이터베이스 정보를 입력
+```
+
+[TiDB Cloud](https://tidbcloud.com) 에서 무료 계정을 등록하고 클러스터를 생성한 후, 연결 페이지에서 `isrgrootx1.pem` 인증서를 다운로드하여 프로젝트 루트에 배치하세요.
+
+```bash
 pip install -r requirements.txt
 python run.py
 ```
