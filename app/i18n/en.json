@@ -160,6 +160,11 @@
     "toast_no_permission": "No permission",
     "toast_upload_failed": "Upload failed",
     "toast_operation_failed": "Operation failed",
+    "toast_comment_failed": "Comment failed",
+    "toast_delete_failed": "Delete failed",
+    "toast_report_failed": "Report failed",
+    "toast_version_loaded": "Loaded version v",
+    "editor_placeholder": "Start writing...",
 
     "error_login_failed": "Invalid username or password",
     "error_account_disabled": "Account is disabled",

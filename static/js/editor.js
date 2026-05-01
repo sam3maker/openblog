@@ -32,7 +32,7 @@ function initRichTextEditor() {
 
     quill = new Quill(editorEl, {
         theme: 'snow',
-        placeholder: '开始写作...',
+        placeholder: window.I18N ? I18N.editorPlaceholder : 'Start writing...',
         modules: {
             toolbar: {
                 container: [
@@ -65,7 +65,7 @@ function initRichTextEditor() {
                                         quill.insertEmbed(range.index, 'image', data.url);
                                     }
                                 })
-                                .catch(() => showToast('图片上传失败', 'error'));
+                                .catch(() => showToast(I18N.uploadFailed, 'error'));
                         };
                     }
                 }
@@ -135,6 +135,6 @@ function loadVersion(versionId) {
                 quill.root.innerHTML = data.content_html || data.content;
             }
             document.querySelector('[name="title"]').value = data.title;
-            showToast('已加载版本 v' + data.version_number);
+            showToast(I18N.versionLoaded + data.version_number);
         });
 }

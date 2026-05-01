@@ -48,7 +48,7 @@ function toggleLike(articleId) {
             }
             count.textContent = data.count;
         })
-        .catch(() => showToast('操作失败', 'error'));
+        .catch(() => showToast(I18N.operationFailed, 'error'));
 }
 
 function toggleBookmark(articleId) {
@@ -68,7 +68,7 @@ function toggleBookmark(articleId) {
             }
             count.textContent = data.count;
         })
-        .catch(() => showToast('操作失败', 'error'));
+        .catch(() => showToast(I18N.operationFailed, 'error'));
 }
 
 function toggleFollow(userId, btnEl) {
@@ -80,13 +80,13 @@ function toggleFollow(userId, btnEl) {
             const btn = btnEl || document.getElementById('follow-btn');
             if (data.following) {
                 btn.className = btn.className.replace('btn-primary', 'btn-secondary').replace('btn-outline-primary', 'btn-secondary');
-                btn.innerHTML = '<i class="bi bi-check-lg"></i> ' + (data.label || '已关注');
+                btn.innerHTML = '<i class="bi bi-check-lg"></i> ' + (data.label || I18N.unfollowDefault);
             } else {
                 btn.className = btn.className.replace('btn-secondary', 'btn-primary');
-                btn.innerHTML = '<i class="bi bi-plus-lg"></i> ' + (data.label || '关注');
+                btn.innerHTML = '<i class="bi bi-plus-lg"></i> ' + (data.label || I18N.followDefault);
             }
         })
-        .catch(() => showToast('操作失败', 'error'));
+        .catch(() => showToast(I18N.operationFailed, 'error'));
 }
 
 /* ========== Comments ========== */
@@ -109,10 +109,10 @@ function submitComment(articleId, parentId, replyToUserId) {
     fetch(`/article/${articleId}/comment`, { method: 'POST', body: form })
         .then(r => {
             if (r.ok) return r.json();
-            return r.json().then(d => { throw new Error(d.error || '评论失败'); });
+            return r.json().then(d => { throw new Error(d.error || I18N.commentFailed); });
         })
         .then(() => location.reload())
-        .catch(err => showToast(err.message || '评论失败', 'error'));
+        .catch(err => showToast(err.message || I18N.commentFailed, 'error'));
     return false;
 }
 
@@ -126,13 +126,13 @@ function showReplyForm(commentId, userId) {
 }
 
 function deleteComment(commentId) {
-    if (!confirm('确定删除此评论?')) return;
+    if (!confirm(I18N.deleteCommentConfirm)) return;
     const form = new FormData();
     form.append('csrf_token', getCSRF());
     fetch(`/comment/${commentId}/delete`, { method: 'POST', body: form })
         .then(r => r.json())
         .then(() => location.reload())
-        .catch(() => showToast('删除失败', 'error'));
+        .catch(() => showToast(I18N.deleteFailed, 'error'));
 }
 
 /* ========== Report ========== */
@@ -145,25 +145,25 @@ function submitReport(articleId) {
         .then(r => r.json())
         .then(data => {
             if (data.success) {
-                showToast('举报已提交');
+                showToast(I18N.reportSubmitted);
                 const modal = bootstrap.Modal.getInstance(document.getElementById('reportModal'));
                 if (modal) modal.hide();
             } else {
-                showToast(data.error || '举报失败', 'error');
+                showToast(data.error || I18N.reportFailed, 'error');
             }
         })
-        .catch(() => showToast('举报失败', 'error'));
+        .catch(() => showToast(I18N.reportFailed, 'error'));
     return false;
 }
 
 /* ========== Delete Article ========== */
 function deleteArticle(articleId) {
-    if (!confirm('确定删除此文章?')) return;
+    if (!confirm(I18N.deleteArticleConfirm)) return;
     const form = new FormData();
     form.append('csrf_token', getCSRF());
     fetch(`/article/${articleId}/delete`, { method: 'POST', body: form })
         .then(() => { window.location.href = '/'; })
-        .catch(() => showToast('删除失败', 'error'));
+        .catch(() => showToast(I18N.deleteFailed, 'error'));
 }
 
 /* ========== Notifications ========== */

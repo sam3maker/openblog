@@ -160,6 +160,11 @@
     "toast_no_permission": "権限がありません",
     "toast_upload_failed": "アップロードに失敗しました",
     "toast_operation_failed": "操作に失敗しました",
+    "toast_comment_failed": "コメントに失敗しました",
+    "toast_delete_failed": "削除に失敗しました",
+    "toast_report_failed": "通報に失敗しました",
+    "toast_version_loaded": "バージョン v を読み込みました",
+    "editor_placeholder": "書き始める...",
 
     "error_login_failed": "ユーザー名またはパスワードが正しくありません",
     "error_account_disabled": "アカウントが無効化されています",

@@ -160,6 +160,11 @@
     "toast_no_permission": "권한이 없습니다",
     "toast_upload_failed": "업로드에 실패했습니다",
     "toast_operation_failed": "작업에 실패했습니다",
+    "toast_comment_failed": "댓글 작성에 실패했습니다",
+    "toast_delete_failed": "삭제에 실패했습니다",
+    "toast_report_failed": "신고에 실패했습니다",
+    "toast_version_loaded": "버전 v을 불러왔습니다",
+    "editor_placeholder": "글쓰기 시작...",
 
     "error_login_failed": "사용자 이름 또는 비밀번호가 올바르지 않습니다",
     "error_account_disabled": "비활성화된 계정입니다",

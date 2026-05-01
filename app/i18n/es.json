@@ -160,6 +160,11 @@
     "toast_no_permission": "Sin permiso",
     "toast_upload_failed": "Error al subir archivo",
     "toast_operation_failed": "Operación fallida",
+    "toast_comment_failed": "Error al comentar",
+    "toast_delete_failed": "Error al eliminar",
+    "toast_report_failed": "Error al reportar",
+    "toast_version_loaded": "Versión v cargada",
+    "editor_placeholder": "Empezar a escribir...",
 
     "error_login_failed": "Nombre de usuario o contraseña incorrectos",
     "error_account_disabled": "La cuenta está desactivada",

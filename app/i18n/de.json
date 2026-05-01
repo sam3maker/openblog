@@ -160,6 +160,11 @@
     "toast_no_permission": "Keine Berechtigung",
     "toast_upload_failed": "Upload fehlgeschlagen",
     "toast_operation_failed": "Vorgang fehlgeschlagen",
+    "toast_comment_failed": "Kommentar fehlgeschlagen",
+    "toast_delete_failed": "Löschen fehlgeschlagen",
+    "toast_report_failed": "Meldung fehlgeschlagen",
+    "toast_version_loaded": "Version v geladen",
+    "editor_placeholder": "Schreiben beginnen...",
 
     "error_login_failed": "Ungültiger Benutzername oder Passwort",
     "error_account_disabled": "Konto ist deaktiviert",
