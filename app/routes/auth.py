@@ -1,4 +1,5 @@
 import json
+import os
 import requests
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, current_user
@@ -111,8 +112,12 @@ def github_login():
     if not Config.GITHUB_CLIENT_ID:
         flash(t('error_github_not_configured'), 'error')
         return redirect(url_for('auth.login'))
+    # HF Spaces provides SPACE_HOST env var automatically
+    space_host = os.environ.get('SPACE_HOST', '')
     if Config.SITE_URL:
         redirect_uri = Config.SITE_URL.rstrip('/') + url_for('auth.github_callback')
+    elif space_host:
+        redirect_uri = f'https://{space_host}' + url_for('auth.github_callback')
     else:
         redirect_uri = request.host_url.rstrip('/') + url_for('auth.github_callback')
     url = (
