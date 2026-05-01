@@ -11,8 +11,6 @@ pinned: false
 
 <img src="logo.png" alt="OpenBlog" width="200">
 
-# OpenBlog
-
 **Open Source Blog Platform | 开源博客平台**
 
 [![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://python.org)
