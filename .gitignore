@@ -6,9 +6,10 @@
 .env.local
 .env.production
 
-# Private keys (keep public certs like isrgrootx1.pem)
+# Private keys & certs (downloaded at build time)
 *.key
 *.crt
+*.pem
 
 # Python
 venv/

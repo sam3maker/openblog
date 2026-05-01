@@ -5,6 +5,8 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+RUN curl -o /app/isrgrootx1.pem https://letsencrypt.org/certs/isrgrootx1.pem
+
 COPY . .
 
 EXPOSE 7860
