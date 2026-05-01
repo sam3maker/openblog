@@ -39,7 +39,8 @@ class Config:
     SITE_URL = os.environ.get('SITE_URL', '')  # e.g. https://sam3maker-openblog.hf.space
 
     # File Upload — SVG removed to prevent stored XSS
-    UPLOAD_FOLDER = str(BASE_DIR / 'static' / 'uploads')
+    # HF Spaces: use /data/uploads for persistent storage
+    UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER', str(BASE_DIR / 'static' / 'uploads'))
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 

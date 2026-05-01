@@ -21,6 +21,13 @@ def ensure_ssl_cert():
         print(f'SSL cert written to {cert_path}')
 
 
+def ensure_upload_dir():
+    """Create upload directory if it doesn't exist"""
+    upload_dir = Config.UPLOAD_FOLDER
+    Path(upload_dir).mkdir(parents=True, exist_ok=True)
+    print(f'Upload folder: {upload_dir}')
+
+
 def ensure_database():
     """确保数据库存在"""
     try:
@@ -70,6 +77,7 @@ def init_app():
 
 app = create_app()
 ensure_ssl_cert()
+ensure_upload_dir()
 init_app()
 
 if __name__ == '__main__':
