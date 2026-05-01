@@ -168,6 +168,12 @@
 
     "error_login_failed": "Ungültiger Benutzername oder Passwort",
     "error_account_disabled": "Konto ist deaktiviert",
+    "error_code_expired": "Code abgelaufen, bitte erneut versuchen",
+    "error_code_invalid": "Ungültiger Code",
+    "reset_password_code": "Ihr Code lautet",
+    "reset_code_expire": "Dieser Code ist 10 Minuten gültig.",
+    "reset_enter_code": "Code eingeben",
+    "reset_new_password": "Neues Passwort",
     "error_fill_required": "Bitte füllen Sie alle Pflichtfelder aus",
     "error_username_length": "Benutzername muss 3 bis 20 Zeichen lang sein",
     "error_password_mismatch": "Passwörter stimmen nicht überein",

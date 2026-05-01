@@ -168,6 +168,12 @@
 
     "error_login_failed": "ユーザー名またはパスワードが正しくありません",
     "error_account_disabled": "アカウントが無効化されています",
+    "error_code_expired": "認証コードが期限切れです。もう一度お試しください",
+    "error_code_invalid": "認証コードが正しくありません",
+    "reset_password_code": "認証コード",
+    "reset_code_expire": "このコードは10分間有効です。",
+    "reset_enter_code": "認証コードを入力",
+    "reset_new_password": "新しいパスワード",
     "error_fill_required": "すべての必須項目を入力してください",
     "error_username_length": "ユーザー名は3〜20文字で入力してください",
     "error_password_mismatch": "パスワードが一致しません",

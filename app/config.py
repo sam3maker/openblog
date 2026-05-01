@@ -1,4 +1,5 @@
 import os
+import secrets
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -11,7 +12,7 @@ if env_path.exists():
 
 
 class Config:
-    SECRET_KEY = os.environ.get('SECRET_KEY', '')
+    SECRET_KEY = os.environ.get('SECRET_KEY') or secrets.token_hex(32)
 
     # TiDB Database
     MYSQL_HOST = os.environ.get('MYSQL_HOST', '')
@@ -37,10 +38,10 @@ class Config:
     GITHUB_CLIENT_SECRET = os.environ.get('GITHUB_CLIENT_SECRET', '')
     SITE_URL = os.environ.get('SITE_URL', '')  # e.g. https://sam3maker-openblog.hf.space
 
-    # File Upload
+    # File Upload — SVG removed to prevent stored XSS
     UPLOAD_FOLDER = str(BASE_DIR / 'static' / 'uploads')
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB
-    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'}
+    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 
     # Pagination
     ARTICLES_PER_PAGE = 10
@@ -50,3 +51,7 @@ class Config:
     # Flask-Login
     LOGIN_VIEW = 'auth.login'
     LOGIN_MESSAGE = 'Please log in first'
+
+    # Email (Resend)
+    RESEND_API_KEY = os.environ.get('RESEND_API_KEY', '')
+    MAIL_FROM = os.environ.get('MAIL_FROM', 'onboarding@resend.dev')

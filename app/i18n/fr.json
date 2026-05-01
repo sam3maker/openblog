@@ -168,6 +168,12 @@
 
     "error_login_failed": "Nom d'utilisateur ou mot de passe incorrect",
     "error_account_disabled": "Le compte est désactivé",
+    "error_code_expired": "Le code a expiré, veuillez réessayer",
+    "error_code_invalid": "Code de vérification invalide",
+    "reset_password_code": "Votre code de vérification est",
+    "reset_code_expire": "Ce code expire dans 10 minutes.",
+    "reset_enter_code": "Entrez le code de vérification",
+    "reset_new_password": "Nouveau mot de passe",
     "error_fill_required": "Veuillez remplir tous les champs obligatoires",
     "error_username_length": "Le nom d'utilisateur doit contenir entre 3 et 20 caractères",
     "error_password_mismatch": "Les mots de passe ne correspondent pas",

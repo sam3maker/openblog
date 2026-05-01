@@ -85,7 +85,8 @@
                             <li><a class="dropdown-item" href="/admin/"><i class="bi bi-shield-check"></i> {{ t('admin_dashboard') }}</a></li>
                             {% endif %}
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="/logout"><i class="bi bi-box-arrow-right"></i> {{ t('logout') }}</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="document.getElementById('logout-form').submit(); return false;"><i class="bi bi-box-arrow-right"></i> {{ t('logout') }}</a></li>
+                            <form id="logout-form" action="/logout" method="POST" class="d-none"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"></form>
                         </ul>
                     </li>
                     {% else %}

@@ -168,6 +168,12 @@
 
     "error_login_failed": "Invalid username or password",
     "error_account_disabled": "Account is disabled",
+    "error_code_expired": "Verification code expired, please try again",
+    "error_code_invalid": "Invalid verification code",
+    "reset_password_code": "Your verification code is",
+    "reset_code_expire": "This code expires in 10 minutes.",
+    "reset_enter_code": "Enter verification code",
+    "reset_new_password": "New password",
     "error_fill_required": "Please fill all required fields",
     "error_username_length": "Username must be 3-20 characters",
     "error_password_mismatch": "Passwords do not match",

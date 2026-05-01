@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """博客平台启动入口"""
 import os
+import secrets
 from pathlib import Path
 import pymysql
 from dotenv import load_dotenv
@@ -56,7 +57,11 @@ def init_app():
                 role='admin',
                 is_active=True
             )
-            admin_password = os.environ.get('ADMIN_PASSWORD', '258852258852')
+            admin_password = os.environ.get('ADMIN_PASSWORD', '')
+            if not admin_password:
+                admin_password = secrets.token_hex(8)
+                print(f'Generated admin password: {admin_password}')
+                print('Set ADMIN_PASSWORD env var to customize.')
             admin.set_password(admin_password)
             db.session.add(admin)
             db.session.commit()

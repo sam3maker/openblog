@@ -101,7 +101,19 @@ function initTagsInput() {
 
             const span = document.createElement('span');
             span.className = 'badge bg-primary d-flex align-items-center';
-            span.innerHTML = `${name}<input type="hidden" name="tags" value="${name}"><button type="button" class="btn-close btn-close-white ms-1" style="font-size:0.6em" onclick="this.parentElement.remove()"></button>`;
+            const textNode = document.createTextNode(name);
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'tags';
+            hiddenInput.value = name;
+            const closeBtn = document.createElement('button');
+            closeBtn.type = 'button';
+            closeBtn.className = 'btn-close btn-close-white ms-1';
+            closeBtn.style.fontSize = '0.6em';
+            closeBtn.onclick = function() { this.parentElement.remove(); };
+            span.appendChild(textNode);
+            span.appendChild(hiddenInput);
+            span.appendChild(closeBtn);
             container.appendChild(span);
             this.value = '';
         }
