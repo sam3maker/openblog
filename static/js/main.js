@@ -80,10 +80,10 @@ function toggleFollow(userId, btnEl) {
             const btn = btnEl || document.getElementById('follow-btn');
             if (data.following) {
                 btn.className = btn.className.replace('btn-primary', 'btn-secondary').replace('btn-outline-primary', 'btn-secondary');
-                btn.innerHTML = '<i class="bi bi-check-lg"></i> 已关注';
+                btn.innerHTML = '<i class="bi bi-check-lg"></i> ' + (data.label || '已关注');
             } else {
                 btn.className = btn.className.replace('btn-secondary', 'btn-primary');
-                btn.innerHTML = '<i class="bi bi-plus-lg"></i> 关注';
+                btn.innerHTML = '<i class="bi bi-plus-lg"></i> ' + (data.label || '关注');
             }
         })
         .catch(() => showToast('操作失败', 'error'));

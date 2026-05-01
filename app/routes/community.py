@@ -146,7 +146,8 @@ def toggle_follow(user_id):
         )
         db.session.add(notif)
     db.session.commit()
-    return jsonify({'following': following})
+    label = t('unfollow') if following else t('follow')
+    return jsonify({'following': following, 'label': label})
 
 
 # ---------- 举报 ----------
