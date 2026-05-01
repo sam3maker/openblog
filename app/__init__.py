@@ -2,6 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_wtf.csrf import CSRFProtect
+from werkzeug.middleware.proxy_fix import ProxyFix
 from app.config import Config, BASE_DIR
 
 db = SQLAlchemy()
@@ -15,6 +16,8 @@ def create_app():
                 static_folder=str(BASE_DIR / 'static'))
     app.config.from_object(Config)
     app.secret_key = Config.SECRET_KEY
+
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 
     db.init_app(app)
     login_manager.init_app(app)

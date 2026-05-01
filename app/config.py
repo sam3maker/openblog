@@ -35,6 +35,7 @@ class Config:
     # GitHub OAuth
     GITHUB_CLIENT_ID = os.environ.get('GITHUB_CLIENT_ID', '')
     GITHUB_CLIENT_SECRET = os.environ.get('GITHUB_CLIENT_SECRET', '')
+    SITE_URL = os.environ.get('SITE_URL', '')  # e.g. https://sam3maker-openblog.hf.space
 
     # File Upload
     UPLOAD_FOLDER = str(BASE_DIR / 'static' / 'uploads')

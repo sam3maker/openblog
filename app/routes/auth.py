@@ -111,7 +111,10 @@ def github_login():
     if not Config.GITHUB_CLIENT_ID:
         flash(t('error_github_not_configured'), 'error')
         return redirect(url_for('auth.login'))
-    redirect_uri = request.host_url.rstrip('/') + url_for('auth.github_callback')
+    if Config.SITE_URL:
+        redirect_uri = Config.SITE_URL.rstrip('/') + url_for('auth.github_callback')
+    else:
+        redirect_uri = request.host_url.rstrip('/') + url_for('auth.github_callback')
     url = (
         f'https://github.com/login/oauth/authorize?client_id={Config.GITHUB_CLIENT_ID}'
         f'&redirect_uri={redirect_uri}&scope=user:email'
