@@ -181,6 +181,7 @@
     "reset_enter_code": "输入验证码",
     "reset_new_password": "新密码",
     "error_fill_required": "请填写所有必填字段",
+    "error_rate_limit": "操作过于频繁，请稍后再试",
     "error_username_length": "用户名长度需要在3-20之间",
     "error_password_mismatch": "两次密码不一致",
     "error_password_short": "密码至少6位",

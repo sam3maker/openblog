@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
+from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, Response, make_response
 from flask_login import current_user, login_required
 from sqlalchemy.orm import joinedload
 from app import db
@@ -8,6 +8,7 @@ from app.utils import (
     render_markdown, sanitize_html, save_image, paginate,
     contains_sensitive, filter_sensitive, creator_required
 )
+from app.config import Config
 from app.i18n import t
 
 blog_bp = Blueprint('blog', __name__)
@@ -19,6 +20,13 @@ def index():
     sort = request.args.get('sort', 'latest')
     category_id = request.args.get('category', 0, type=int)
     tag_id = request.args.get('tag', 0, type=int)
+
+    # Publish scheduled articles whose time has come
+    Article.query.filter(
+        Article.status == 'scheduled',
+        Article.scheduled_at <= datetime.now(timezone.utc)
+    ).update({'status': 'published', 'published_at': Article.scheduled_at})
+    db.session.commit()
 
     query = Article.query.options(joinedload(Article.author)).filter_by(status='published')
     if category_id:
@@ -50,7 +58,7 @@ def index():
 
 @blog_bp.route('/article/<int:article_id>')
 def article(article_id):
-    article = Article.query.get_or_404(article_id)
+    article = Article.query.options(joinedload(Article.author)).get_or_404(article_id)
     if article.status == 'removed':
         flash(t('admin_status_removed'), 'error')
         return redirect(url_for('blog.index'))
@@ -59,8 +67,11 @@ def article(article_id):
         flash(t('no_articles'), 'error')
         return redirect(url_for('blog.index'))
 
-    article.view_count += 1
+    # Atomic view count increment
+    db.session.query(Article).filter_by(id=article_id).update(
+        {'view_count': Article.view_count + 1})
     db.session.commit()
+    db.session.refresh(article)
 
     is_liked = False
     is_bookmarked = False
@@ -70,11 +81,19 @@ def article(article_id):
         is_bookmarked = Bookmark.query.filter_by(article_id=article.id, user_id=current_user.id).first() is not None
 
     from app.models import Comment
-    comments = Comment.query.filter_by(article_id=article.id, parent_id=None, is_deleted=False)\
+    comments = Comment.query.options(
+        joinedload(Comment.user),
+        joinedload(Comment.reply_to_user),
+    ).filter_by(article_id=article.id, parent_id=None, is_deleted=False)\
         .order_by(Comment.created_at.desc()).all()
 
+    # Calculate reading time
+    word_count = len(article.content) if article.content else 0
+    reading_time = max(1, word_count // 400)
+
     return render_template('blog/article.html', article=article, comments=comments,
-                           is_liked=is_liked, is_bookmarked=is_bookmarked)
+                           is_liked=is_liked, is_bookmarked=is_bookmarked,
+                           reading_time=reading_time, word_count=word_count)
 
 
 @blog_bp.route('/editor', methods=['GET', 'POST'])
@@ -256,3 +275,40 @@ def upload_image():
     if path:
         return jsonify({'url': path})
     return jsonify({'error': t('error_unsupported_format')}), 400
+
+
+# ---------- RSS ----------
+
+@blog_bp.route('/feed')
+def rss_feed():
+    from app.models import SiteConfig
+    site_name = SiteConfig.get('site_name', 'OpenBlog')
+    site_desc = SiteConfig.get('site_description', 'An Open Source Blog Platform')
+    base_url = Config.SITE_URL or request.host_url.rstrip('/')
+
+    articles = Article.query.filter_by(status='published')\
+        .order_by(Article.published_at.desc()).limit(20).all()
+
+    items = ''
+    for a in articles:
+        link = f'{base_url}/article/{a.id}'
+        pub_date = a.published_at.strftime('%a, %d %b %Y %H:%M:%S GMT') if a.published_at else ''
+        items += f'''<item>
+  <title>{a.title}</title>
+  <link>{link}</link>
+  <description>{a.summary[:200]}</description>
+  <pubDate>{pub_date}</pubDate>
+  <author>{a.author.username if a.author else ''}</author>
+</item>'''
+
+    xml = f'''<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+<channel>
+  <title>{site_name}</title>
+  <link>{base_url}</link>
+  <description>{site_desc}</description>
+  <language>zh-cn</language>
+  {items}
+</channel>
+</rss>'''
+    return Response(xml, mimetype='application/rss+xml')

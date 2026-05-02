@@ -1,6 +1,9 @@
 import json
 import os
 import re
+import hmac
+import hashlib
+import time
 import secrets as py_secrets
 import requests
 from flask import Blueprint, render_template, redirect, url_for, flash, request, session
@@ -14,11 +17,50 @@ from app.i18n import t
 auth_bp = Blueprint('auth', __name__)
 
 
+# ---------- Rate Limiting ----------
+
+def rate_limit(key, max_attempts=5, window=300):
+    """Simple session-based rate limiter. Returns True if rate limited."""
+    now = time.time()
+    attempts = session.get(key, [])
+    attempts = [t for t in attempts if now - t < window]
+    if len(attempts) >= max_attempts:
+        session[key] = attempts
+        return True
+    attempts.append(now)
+    session[key] = attempts
+    return False
+
+
+# ---------- OAuth State Signing ----------
+
+def sign_state(state_data):
+    """Sign OAuth state to prevent tampering."""
+    sig = hmac.new(Config.SECRET_KEY.encode(), state_data.encode(), hashlib.sha256).hexdigest()[:16]
+    return f'{state_data}.{sig}'
+
+
+def verify_state(state):
+    """Verify OAuth state signature. Returns the state data or None."""
+    if not state or '.' not in state:
+        return None
+    data, sig = state.rsplit('.', 1)
+    expected = hmac.new(Config.SECRET_KEY.encode(), data.encode(), hashlib.sha256).hexdigest()[:16]
+    if hmac.compare_digest(sig, expected):
+        return data
+    return None
+
+
+# ---------- Routes ----------
+
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('blog.index'))
     if request.method == 'POST':
+        if rate_limit('login_attempts', max_attempts=5, window=300):
+            flash(t('error_rate_limit'), 'error')
+            return redirect(url_for('auth.login'))
         username = request.form.get('username', '').strip()
         password = request.form.get('password', '')
         remember = request.form.get('remember', False)
@@ -28,6 +70,7 @@ def login():
                 flash(t('error_account_disabled'), 'error')
                 return redirect(url_for('auth.login'))
             login_user(user, remember=remember)
+            session.pop('login_attempts', None)
             next_page = request.args.get('next')
             if next_page and not next_page.startswith('/'):
                 next_page = None
@@ -41,6 +84,9 @@ def register():
     if current_user.is_authenticated:
         return redirect(url_for('blog.index'))
     if request.method == 'POST':
+        if rate_limit('register_attempts', max_attempts=3, window=600):
+            flash(t('error_rate_limit'), 'error')
+            return redirect(url_for('auth.register'))
         username = request.form.get('username', '').strip()
         email = request.form.get('email', '').strip()
         password = request.form.get('password', '')
@@ -119,6 +165,9 @@ def reset_password():
 
     # Step 1: Enter email
     if request.method == 'POST' and not session.get('reset_verified_user_id'):
+        if rate_limit('reset_attempts', max_attempts=3, window=600):
+            flash(t('error_rate_limit'), 'error')
+            return redirect(url_for('auth.reset_password'))
         email = request.form.get('email', '').strip()
         if not email:
             flash(t('error_fill_required'), 'error')
@@ -152,8 +201,11 @@ def github_login():
     else:
         redirect_uri = request.host_url.rstrip('/') + url_for('auth.github_callback')
 
-    # If this is a password reset flow, add state parameter
-    state = 'reset_password' if session.get('reset_via_github') else 'login'
+    # If this is a password reset flow, add state parameter with HMAC signature
+    if session.get('reset_via_github'):
+        state = sign_state('reset_password')
+    else:
+        state = sign_state('login')
 
     url = (
         f'https://github.com/login/oauth/authorize?client_id={Config.GITHUB_CLIENT_ID}'
@@ -165,8 +217,9 @@ def github_login():
 @auth_bp.route('/github/callback')
 def github_callback():
     code = request.args.get('code')
-    state = request.args.get('state', 'login')
-    if not code:
+    raw_state = request.args.get('state', '')
+    state = verify_state(raw_state)
+    if not code or not state:
         flash(t('error_github_failed'), 'error')
         return redirect(url_for('auth.login'))
 

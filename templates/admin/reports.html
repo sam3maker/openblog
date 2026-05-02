@@ -41,17 +41,6 @@
                         <button class="btn btn-sm btn-danger" onclick="resolveReport({{ report.id }}, 'resolve')">{{ t('admin_remove') }}</button>
                         <button class="btn btn-sm btn-secondary" onclick="resolveReport({{ report.id }}, 'reject')">{{ t('admin_reject') }}</button>
                     </div>
-                    <script>
-                    function resolveReport(id, action) {
-                        const form = new FormData();
-                        form.append('action', action);
-                        form.append('csrf_token', '{{ csrf_token() }}');
-                        fetch('/admin/report/' + id + '/resolve', {method:'POST', body: form})
-                            .then(r => r.json())
-                            .then(() => location.reload())
-                            .catch(() => alert('Error'));
-                    }
-                    </script>
                     {% else %}
                     <span class="text-muted">-</span>
                     {% endif %}
@@ -62,4 +51,18 @@
         </table>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function resolveReport(id, action) {
+    const form = new FormData();
+    form.append('action', action);
+    form.append('csrf_token', '{{ csrf_token() }}');
+    fetch('/admin/report/' + id + '/resolve', {method:'POST', body: form})
+        .then(r => r.json())
+        .then(() => location.reload())
+        .catch(() => alert('Error'));
+}
+</script>
 {% endblock %}

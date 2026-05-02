@@ -181,6 +181,7 @@
     "reset_enter_code": "Ingrese el código de verificación",
     "reset_new_password": "Nueva contraseña",
     "error_fill_required": "Complete todos los campos obligatorios",
+    "error_rate_limit": "Demasiados intentos, intente de nuevo más tarde",
     "error_username_length": "El nombre de usuario debe tener entre 3 y 20 caracteres",
     "error_password_mismatch": "Las contraseñas no coinciden",
     "error_password_short": "La contraseña debe tener al menos 6 caracteres",

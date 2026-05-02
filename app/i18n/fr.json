@@ -181,6 +181,7 @@
     "reset_enter_code": "Entrez le code de vérification",
     "reset_new_password": "Nouveau mot de passe",
     "error_fill_required": "Veuillez remplir tous les champs obligatoires",
+    "error_rate_limit": "Trop de tentatives, veuillez réessayer plus tard",
     "error_username_length": "Le nom d'utilisateur doit contenir entre 3 et 20 caractères",
     "error_password_mismatch": "Les mots de passe ne correspondent pas",
     "error_password_short": "Le mot de passe doit contenir au moins 6 caractères",

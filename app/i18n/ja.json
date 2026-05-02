@@ -181,6 +181,7 @@
     "reset_enter_code": "認証コードを入力",
     "reset_new_password": "新しいパスワード",
     "error_fill_required": "すべての必須項目を入力してください",
+    "error_rate_limit": "試行回数が多すぎます。しばらくしてからもう一度お試しください",
     "error_username_length": "ユーザー名は3〜20文字で入力してください",
     "error_password_mismatch": "パスワードが一致しません",
     "error_password_short": "パスワードは6文字以上で入力してください",

@@ -72,6 +72,8 @@ def upload():
     if not allowed_file(file.filename):
         return jsonify({'error': t('error_unsupported_format')}), 400
     file_data = file.read()
+    if len(file_data) > 5 * 1024 * 1024:  # 5MB limit
+        return jsonify({'error': 'File too large (max 5MB)'}), 400
     up = Upload(
         filename=file.filename,
         content_type=file.content_type or 'application/octet-stream',

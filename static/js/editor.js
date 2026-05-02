@@ -24,6 +24,56 @@ function initMarkdownEditor() {
     if (mdInput.value && typeof marked !== 'undefined') {
         mdPreview.innerHTML = marked.parse(mdInput.value);
     }
+
+    // Markdown image upload: paste or drag-and-drop
+    mdInput.addEventListener('paste', function(e) {
+        const items = e.clipboardData && e.clipboardData.items;
+        if (!items) return;
+        for (const item of items) {
+            if (item.type.startsWith('image/')) {
+                e.preventDefault();
+                const file = item.getAsFile();
+                uploadMarkdownImage(file, mdInput);
+                break;
+            }
+        }
+    });
+
+    mdInput.addEventListener('drop', function(e) {
+        const files = e.dataTransfer && e.dataTransfer.files;
+        if (!files || !files.length) return;
+        for (const file of files) {
+            if (file.type.startsWith('image/')) {
+                e.preventDefault();
+                uploadMarkdownImage(file, mdInput);
+                break;
+            }
+        }
+    });
+    mdInput.addEventListener('dragover', function(e) {
+        e.preventDefault();
+    });
+}
+
+function uploadMarkdownImage(file, mdInput) {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('csrf_token', getCSRF());
+    const placeholder = `![uploading...]\n`;
+    const pos = mdInput.selectionStart;
+    mdInput.value = mdInput.value.slice(0, pos) + placeholder + mdInput.value.slice(pos);
+    fetch('/api/upload', { method: 'POST', body: formData })
+        .then(r => r.json())
+        .then(data => {
+            if (data.url) {
+                mdInput.value = mdInput.value.replace(placeholder, `![](${data.url})\n`);
+                mdInput.dispatchEvent(new Event('input'));
+            }
+        })
+        .catch(() => {
+            mdInput.value = mdInput.value.replace(placeholder, '');
+            if (typeof showToast === 'function') showToast(I18N.uploadFailed, 'error');
+        });
 }
 
 function initRichTextEditor() {

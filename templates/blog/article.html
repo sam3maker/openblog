@@ -2,6 +2,11 @@
 {% block title %}{{ article.title }}{% endblock %}
 
 {% block content %}
+<div class="mb-3">
+    <a href="javascript:history.back()" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> {{ t('back_home') }}
+    </a>
+</div>
 <article class="row">
     <div class="col-lg-9">
         <div class="card">
@@ -17,6 +22,9 @@
                     </span>
                     <span class="text-muted me-3"><i class="bi bi-eye"></i> {{ article.view_count }}</span>
                     <span class="text-muted me-3"><i class="bi bi-heart"></i> {{ article.like_count }}</span>
+                    {% if reading_time %}
+                    <span class="text-muted me-3"><i class="bi bi-book"></i> {{ reading_time }} min</span>
+                    {% endif %}
                     {% if article.category %}
                     <a href="/category/{{ article.category.id }}" class="badge bg-secondary text-decoration-none me-2">{{ article.category.name }}</a>
                     {% endif %}
@@ -151,6 +159,11 @@
 
     <!-- 侧边栏 -->
     <div class="col-lg-3">
+        <!-- TOC -->
+        <div class="card sidebar-card mb-3" id="toc-card" style="display:none">
+            <div class="card-header"><i class="bi bi-list-nested"></i> TOC</div>
+            <div class="card-body p-2" id="toc-list"></div>
+        </div>
         <div class="card sidebar-card mb-3">
             <div class="card-body text-center">
                 <img src="{{ article.author.avatar or '/static/uploads/default_avatar.png' }}" class="avatar-lg mb-2" alt="">
@@ -211,6 +224,25 @@
 
 {% block extra_js %}
 <script>
+// Generate TOC from headings
+(function() {
+    const content = document.querySelector('.article-content');
+    if (!content) return;
+    const headings = content.querySelectorAll('h2, h3');
+    if (headings.length < 2) return;
+    const tocCard = document.getElementById('toc-card');
+    const tocList = document.getElementById('toc-list');
+    let html = '';
+    headings.forEach((h, i) => {
+        const id = 'heading-' + i;
+        h.id = id;
+        const indent = h.tagName === 'H3' ? 'ms-2' : '';
+        html += `<div class="${indent} mb-1"><a href="#${id}" class="text-decoration-none small">${h.textContent}</a></div>`;
+    });
+    tocList.innerHTML = html;
+    tocCard.style.display = '';
+})();
+
 {% if current_user.is_authenticated and (current_user.id == article.author_id or current_user.is_admin) %}
 fetch('/article/{{ article.id }}/versions').then(r=>r.json()).then(data => {
     const el = document.getElementById('versions-list');

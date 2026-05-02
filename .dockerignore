@@ -1,0 +1,9 @@
+.env
+.git
+.gitignore
+*.pem
+__pycache__
+*.pyc
+.claude
+*.md
+welcome.png

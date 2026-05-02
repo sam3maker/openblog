@@ -80,5 +80,10 @@ ensure_ssl_cert()
 ensure_upload_dir()
 init_app()
 
+if not os.environ.get('SECRET_KEY'):
+    print('WARNING: SECRET_KEY not set. Sessions will reset on restart!')
+    print('Set SECRET_KEY env var for production.')
+
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    debug = os.environ.get('FLASK_DEBUG', '0') == '1'
+    app.run(debug=debug, host='0.0.0.0', port=5000)
