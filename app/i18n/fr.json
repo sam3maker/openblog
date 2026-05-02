@@ -173,6 +173,7 @@
     "error_account_disabled": "Le compte est désactivé",
     "error_code_expired": "Le code a expiré, veuillez réessayer",
     "error_code_invalid": "Code de vérification invalide",
+    "error_email_send_failed": "Échec de l'envoi de l'e-mail. Veuillez vérifier votre adresse e-mail ou réessayer plus tard",
     "reset_password_code": "Votre code de vérification est",
     "reset_code_expire": "Ce code expire dans 10 minutes.",
     "reset_enter_code": "Entrez le code de vérification",

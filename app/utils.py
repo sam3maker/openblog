@@ -74,22 +74,35 @@ def allowed_file(filename):
 
 
 def save_image(file, subdir='', max_size=(1200, 1200), quality=85):
-    """保存并压缩图片，返回文件路径"""
+    """保存并压缩图片到数据库，返回文件 URL"""
     if not file or not allowed_file(file.filename):
         return None
-    filename = file.filename
-    ext = filename.rsplit('.', 1)[1].lower()
-    from datetime import datetime
-    new_name = datetime.now().strftime('%Y%m%d%H%M%S') + f'_{os.urandom(4).hex()}.{ext}'
-    upload_dir = os.path.join(Config.UPLOAD_FOLDER, subdir)
-    os.makedirs(upload_dir, exist_ok=True)
-    filepath = os.path.join(upload_dir, new_name)
+    from io import BytesIO
+    from app.models import Upload
+    from flask_login import current_user
+    from app import db
+
     img = Image.open(file)
     img.thumbnail(max_size)
     if img.mode in ('RGBA', 'P'):
         img = img.convert('RGB')
-    img.save(filepath, quality=quality, optimize=True)
-    return f'/static/uploads/{subdir}/{new_name}'
+
+    buf = BytesIO()
+    img.save(buf, format='JPEG', quality=quality, optimize=True)
+    file_data = buf.getvalue()
+
+    ext = file.filename.rsplit('.', 1)[1].lower()
+    content_type = {'png': 'image/png', 'gif': 'image/gif', 'webp': 'image/webp'}.get(ext, 'image/jpeg')
+
+    up = Upload(
+        filename=file.filename,
+        content_type=content_type,
+        data=file_data,
+        user_id=current_user.id if current_user.is_authenticated else None,
+    )
+    db.session.add(up)
+    db.session.commit()
+    return f'/api/file/{up.id}'
 
 
 def admin_required(f):

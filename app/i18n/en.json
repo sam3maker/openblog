@@ -173,6 +173,7 @@
     "error_account_disabled": "Account is disabled",
     "error_code_expired": "Verification code expired, please try again",
     "error_code_invalid": "Invalid verification code",
+    "error_email_send_failed": "Failed to send email. Please check your email address or try again later.",
     "reset_password_code": "Your verification code is",
     "reset_code_expire": "This code expires in 10 minutes.",
     "reset_enter_code": "Enter verification code",

@@ -121,11 +121,10 @@
                 <td>{{ report.reporter.username if report.reporter else '-' }}</td>
                 <td>{{ report.created_at.strftime('%m-%d %H:%M') }}</td>
                 <td>
-                    <form method="post" action="/admin/report/{{ report.id }}/resolve" class="d-inline">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <button class="btn btn-sm btn-danger" name="action" value="resolve">{{ t('admin_remove') }}</button>
-                        <button class="btn btn-sm btn-secondary" name="action" value="reject">{{ t('admin_reject') }}</button>
-                    </form>
+                    <div class="d-inline d-flex gap-1">
+                        <button class="btn btn-sm btn-danger" onclick="resolveReport({{ report.id }}, 'resolve')">{{ t('admin_remove') }}</button>
+                        <button class="btn btn-sm btn-secondary" onclick="resolveReport({{ report.id }}, 'reject')">{{ t('admin_reject') }}</button>
+                    </div>
                 </td>
             </tr>
             {% endfor %}
@@ -134,4 +133,16 @@
     </div>
 </div>
 {% endif %}
+{% block extra_js %}
+<script>
+function resolveReport(id, action) {
+    const form = new FormData();
+    form.append('action', action);
+    form.append('csrf_token', '{{ csrf_token() }}');
+    fetch('/admin/report/' + id + '/resolve', {method:'POST', body: form})
+        .then(r => r.json())
+        .then(() => location.reload())
+        .catch(() => alert('Error'));
+}
+</script>
 {% endblock %}

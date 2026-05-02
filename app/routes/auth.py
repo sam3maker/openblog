@@ -117,9 +117,9 @@ def reset_password():
                     "html": f"<p>{t('reset_password_code')}: <strong>{code}</strong></p><p>{t('reset_code_expire')}</p>"
                 })
             except Exception as e:
-                print(f'Email send error: {e}')
-                flash('Email send failed, please try again.', 'error')
-                return redirect(url_for('auth.reset_password'))
+                print(f'[ERROR] Email send failed: {e}')
+                flash(t('error_email_send_failed'), 'error')
+                return render_template('auth/reset_password.html', step='verify', email=email)
         else:
             # No email configured — show code in console (dev mode)
             print(f'[DEV] Reset code for {email}: {code}')

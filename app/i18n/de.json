@@ -173,6 +173,7 @@
     "error_account_disabled": "Konto ist deaktiviert",
     "error_code_expired": "Code abgelaufen, bitte erneut versuchen",
     "error_code_invalid": "Ungültiger Code",
+    "error_email_send_failed": "E-Mail konnte nicht gesendet werden. Bitte überprüfen Sie die Adresse oder versuchen Sie es später",
     "reset_password_code": "Ihr Code lautet",
     "reset_code_expire": "Dieser Code ist 10 Minuten gültig.",
     "reset_enter_code": "Code eingeben",
