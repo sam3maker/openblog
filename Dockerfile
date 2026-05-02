@@ -9,4 +9,4 @@ COPY . .
 
 EXPOSE 7860
 
-CMD ["gunicorn", "run:app", "--bind", "0.0.0.0:7860", "--workers", "2", "--timeout", "120", "--preload"]
+CMD ["gunicorn", "run:app", "--bind", "0.0.0.0:7860", "--workers", "2", "--timeout", "120"]
