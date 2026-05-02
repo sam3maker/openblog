@@ -52,7 +52,3 @@ class Config:
     # Flask-Login
     LOGIN_VIEW = 'auth.login'
     LOGIN_MESSAGE = 'Please log in first'
-
-    # Email (Resend)
-    RESEND_API_KEY = os.environ.get('RESEND_API_KEY', '')
-    MAIL_FROM = os.environ.get('MAIL_FROM', 'onboarding@resend.dev')

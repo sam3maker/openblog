@@ -91,70 +91,29 @@ def logout():
 
 @auth_bp.route('/reset_password', methods=['GET', 'POST'])
 def reset_password():
-    if request.method == 'POST' and 'code' not in request.form:
-        # Step 1: submit email, send verification code
+    if request.method == 'POST':
         email = request.form.get('email', '').strip()
+        new_password = request.form.get('new_password', '')
+        confirm = request.form.get('confirm', '')
+
+        if not all([email, new_password, confirm]):
+            flash(t('error_fill_required'), 'error')
+            return redirect(url_for('auth.reset_password'))
         user = User.query.filter_by(email=email).first()
         if not user:
             flash(t('error_email_not_found'), 'error')
             return redirect(url_for('auth.reset_password'))
-        # Generate 6-digit code
-        code = f'{py_secrets.randbelow(1000000):06d}'
-        session['reset_code'] = code
-        session['reset_email'] = email
-        # Calculate expiry
-        from datetime import datetime, timezone, timedelta
-        session['reset_expires'] = (datetime.now(timezone.utc) + timedelta(minutes=10)).isoformat()
-        # Send email via Resend
-        if Config.RESEND_API_KEY:
-            try:
-                import resend
-                resend.api_key = Config.RESEND_API_KEY
-                resend.Emails.send({
-                    "from": Config.MAIL_FROM,
-                    "to": email,
-                    "subject": f"{t('reset_password')} - OpenBlog",
-                    "html": f"<p>{t('reset_password_code')}: <strong>{code}</strong></p><p>{t('reset_code_expire')}</p>"
-                })
-            except Exception as e:
-                print(f'[ERROR] Email send failed: {e}')
-                flash(t('error_email_send_failed'), 'error')
-                return render_template('auth/reset_password.html', step='verify', email=email)
-        else:
-            # No email configured — show code in console (dev mode)
-            print(f'[DEV] Reset code for {email}: {code}')
-        return render_template('auth/reset_password.html', step='verify', email=email)
-    # Step 2: verify code + set new password
-    if request.method == 'POST' and 'code' in request.form:
-        code = request.form.get('code', '').strip()
-        new_password = request.form.get('new_password', '')
-        confirm = request.form.get('confirm', '')
-        stored_code = session.get('reset_code', '')
-        stored_email = session.get('reset_email', '')
-        expires = session.get('reset_expires', '')
-        from datetime import datetime, timezone
-        if not stored_code or not expires:
-            flash(t('error_code_expired'), 'error')
-            return redirect(url_for('auth.reset_password'))
-        if datetime.now(timezone.utc).isoformat() > expires:
-            session.pop('reset_code', None)
-            session.pop('reset_email', None)
-            session.pop('reset_expires', None)
-            flash(t('error_code_expired'), 'error')
-            return redirect(url_for('auth.reset_password'))
-        if code != stored_code:
-            flash(t('error_code_invalid'), 'error')
-            return render_template('auth/reset_password.html', step='verify', email=stored_email)
         if new_password != confirm:
             flash(t('error_password_mismatch'), 'error')
-            return render_template('auth/reset_password.html', step='verify', email=stored_email)
+            return redirect(url_for('auth.reset_password'))
         if len(new_password) < 6:
             flash(t('error_password_short'), 'error')
-            return render_template('auth/reset_password.html', step='verify', email=stored_email)
-        user = User.query.filter_by(email=stored_email).first()
-        if user:
-            user.set_password(new_password)
-            db.session.commit()
+            return redirect(url_for('auth.reset_password'))
+        user.set_password(new_password)
+        db.session.commit()
+        flash(t('toast_password_reset'), 'success')
+        return redirect(url_for('auth.login'))
+    return render_template('auth/reset_password.html')
         session.pop('reset_code', None)
         session.pop('reset_email', None)
         session.pop('reset_expires', None)
