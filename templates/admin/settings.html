@@ -41,13 +41,7 @@
                         <label class="form-label">Client ID</label>
                         <input type="text" class="form-control" name="github_client_id" value="{{ config.github_client_id }}">
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Client Secret</label>
-                        <input type="password" class="form-control" name="github_client_secret" value="{{ config.github_client_secret }}">
-                    </div>
-                    <small class="text-muted">
-                        <a href="https://github.com/settings/developers" target="_blank">GitHub Developer Settings</a>
-                    </small>
+                    <small class="text-muted">Client Secret is configured via environment variable (GITHUB_CLIENT_SECRET).</small>
                 </div>
             </div>
             <button type="submit" class="btn btn-primary w-100"><i class="bi bi-check"></i> {{ t('admin_save_settings') }}</button>

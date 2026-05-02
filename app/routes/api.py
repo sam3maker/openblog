@@ -71,12 +71,16 @@ def upload():
         return jsonify({'error': t('error_file_not_selected')}), 400
     if not allowed_file(file.filename):
         return jsonify({'error': t('error_unsupported_format')}), 400
+    # Validate MIME type
+    mime = file.content_type or ''
+    if not mime.startswith('image/'):
+        return jsonify({'error': t('error_unsupported_format')}), 400
     file_data = file.read()
     if len(file_data) > 5 * 1024 * 1024:  # 5MB limit
         return jsonify({'error': 'File too large (max 5MB)'}), 400
     up = Upload(
         filename=file.filename,
-        content_type=file.content_type or 'application/octet-stream',
+        content_type=mime,
         data=file_data,
         user_id=current_user.id,
     )

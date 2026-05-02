@@ -33,6 +33,24 @@
             <p class="mt-2">{{ t('no_notifications') }}</p>
         </div>
         {% endif %}
+
+        {% if pagination and pagination.pages > 1 %}
+        <nav>
+            <ul class="pagination justify-content-center">
+                <li class="page-item {{ 'disabled' if not pagination.has_prev else '' }}">
+                    <a class="page-link" href="?page={{ pagination.prev_num }}">&laquo;</a>
+                </li>
+                {% for p in pagination.iter_pages() %}
+                <li class="page-item {{ 'active' if p == pagination.page else '' }}">
+                    <a class="page-link" href="?page={{ p }}">{{ p }}</a>
+                </li>
+                {% endfor %}
+                <li class="page-item {{ 'disabled' if not pagination.has_next else '' }}">
+                    <a class="page-link" href="?page={{ pagination.next_num }}">&raquo;</a>
+                </li>
+            </ul>
+        </nav>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

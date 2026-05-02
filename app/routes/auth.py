@@ -72,7 +72,7 @@ def login():
             login_user(user, remember=remember)
             session.pop('login_attempts', None)
             next_page = request.args.get('next')
-            if next_page and not next_page.startswith('/'):
+            if next_page and (not next_page.startswith('/') or next_page.startswith('//')):
                 next_page = None
             return redirect(next_page or url_for('blog.index'))
         flash(t('error_login_failed'), 'error')

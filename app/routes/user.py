@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
 from flask_login import current_user, login_required
+from sqlalchemy.orm import joinedload
 from app import db
 from app.models import User, Article, Follow, Bookmark, Notification, Upload
 from app.utils import save_image, paginate, filter_sensitive, allowed_file
@@ -15,12 +16,15 @@ def profile(user_id):
     tab = request.args.get('tab', 'articles')
 
     if tab == 'articles':
-        query = Article.query.filter_by(author_id=user_id, status='published')\
-            .order_by(Article.published_at.desc())
+        query = Article.query.options(joinedload(Article.author)).filter_by(
+            author_id=user_id, status='published'
+        ).order_by(Article.published_at.desc())
         pagination = paginate(query, page)
         items = pagination.items
     elif tab == 'bookmarks' and current_user.is_authenticated and current_user.id == user_id:
-        query = Bookmark.query.filter_by(user_id=user_id).order_by(Bookmark.created_at.desc())
+        query = Bookmark.query.options(
+            joinedload(Bookmark.article).joinedload(Article.author)
+        ).filter_by(user_id=user_id).order_by(Bookmark.created_at.desc())
         pagination = paginate(query, page)
         items = pagination.items
     else:
@@ -128,7 +132,7 @@ def timeline():
     if not following_ids:
         return render_template('user/timeline.html', articles=[], pagination=None)
 
-    query = Article.query.filter(
+    query = Article.query.options(joinedload(Article.author)).filter(
         Article.author_id.in_(following_ids),
         Article.status == 'published'
     ).order_by(Article.published_at.desc())
@@ -144,9 +148,6 @@ def notifications():
     query = Notification.query.filter_by(user_id=current_user.id)\
         .order_by(Notification.created_at.desc())
     pagination = paginate(query, page, per_page=20)
-    for n in pagination.items:
-        n.is_read = True
-    db.session.commit()
     return render_template('user/notifications.html', notifications=pagination.items,
                            pagination=pagination)
 

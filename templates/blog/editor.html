@@ -94,7 +94,16 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">{{ t('article_cover') }}</label>
-                        <input type="file" class="form-control" name="cover_image" accept="image/*">
+                        <input type="file" class="form-control" name="cover_image" accept="image/*" onchange="previewCover(this)">
+                        {% if article and article.cover_image %}
+                        <div class="mt-2" id="cover-preview-container">
+                            <img src="{{ article.cover_image }}" id="cover-preview" class="img-fluid rounded" style="max-height:150px" alt="">
+                        </div>
+                        {% else %}
+                        <div class="mt-2 d-none" id="cover-preview-container">
+                            <img src="" id="cover-preview" class="img-fluid rounded" style="max-height:150px" alt="">
+                        </div>
+                        {% endif %}
                     </div>
                     <div class="mb-3">
                         <label class="form-label">{{ t('article_scheduled_time') }}</label>
@@ -137,6 +146,20 @@
 <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="/static/js/editor.js"></script>
+<script>
+function previewCover(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const container = document.getElementById('cover-preview-container');
+            const img = document.getElementById('cover-preview');
+            img.src = e.target.result;
+            container.classList.remove('d-none');
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+</script>
 <script>
 {% if article %}
 fetch('/article/{{ article.id }}/versions').then(r=>r.json()).then(data => {

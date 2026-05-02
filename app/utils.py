@@ -59,14 +59,20 @@ def sanitize_html(html):
         'td', 'th', 'thead', 'tr', 'ul', 'del', 'sup', 'sub',
     ]
     allowed_attrs = {
-        '*': ['class', 'id'],
         'a': ['href', 'title', 'target'],
         'img': ['src', 'alt', 'width', 'height'],
         'code': ['class'],
         'pre': ['class'],
         'span': ['class'],
+        'td': ['colspan', 'rowspan'],
+        'th': ['colspan', 'rowspan'],
     }
     return bleach.clean(html, tags=allowed_tags, attributes=allowed_attrs, strip=True)
+
+
+def sanitize_comment(text):
+    """Sanitize plain-text comment content (strip all HTML tags)."""
+    return bleach.clean(text, tags=[], attributes={}, strip=True)
 
 
 def allowed_file(filename):

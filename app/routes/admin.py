@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
 from flask_login import current_user, login_required
+from sqlalchemy.orm import joinedload
 from app import db
 from app.models import Article, User, Category, Tag, Report, SiteConfig, Comment
 from app.utils import admin_required, paginate
@@ -26,9 +27,9 @@ def dashboard():
         'comments': Comment.query.count(),
         'reports': Report.query.filter_by(status='pending').count(),
     }
-    recent_articles = Article.query.order_by(Article.created_at.desc()).limit(10).all()
+    recent_articles = Article.query.options(joinedload(Article.author)).order_by(Article.created_at.desc()).limit(10).all()
     recent_users = User.query.order_by(User.created_at.desc()).limit(10).all()
-    pending_reports = Report.query.filter_by(status='pending').order_by(Report.created_at.desc()).limit(10).all()
+    pending_reports = Report.query.options(joinedload(Report.reporter)).filter_by(status='pending').order_by(Report.created_at.desc()).limit(10).all()
     return render_template('admin/dashboard.html', stats=stats,
                            recent_articles=recent_articles,
                            recent_users=recent_users,
@@ -102,7 +103,7 @@ def toggle_active(user_id):
 def reports():
     page = request.args.get('page', 1, type=int)
     status = request.args.get('status', 'pending')
-    query = Report.query
+    query = Report.query.options(joinedload(Report.reporter))
     if status:
         query = query.filter_by(status=status)
     query = query.order_by(Report.created_at.desc())
@@ -157,7 +158,7 @@ def delete_category(cat_id):
 def settings():
     if request.method == 'POST':
         keys = ['site_name', 'site_logo', 'site_description', 'site_notice',
-                'site_footer', 'github_client_id', 'github_client_secret']
+                'site_footer', 'github_client_id']
         for key in keys:
             value = request.form.get(key, '')
             SiteConfig.set(key, value)
@@ -166,6 +167,6 @@ def settings():
 
     config = {}
     for key in ['site_name', 'site_logo', 'site_description', 'site_notice', 'site_footer',
-                'github_client_id', 'github_client_secret']:
+                'github_client_id']:
         config[key] = SiteConfig.get(key)
     return render_template('admin/settings.html', config=config)

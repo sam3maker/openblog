@@ -1,3 +1,5 @@
+import time
+from xml.sax.saxutils import escape as xml_escape
 from datetime import datetime, timezone
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, Response, make_response
 from flask_login import current_user, login_required
@@ -14,19 +16,33 @@ from app.i18n import t
 blog_bp = Blueprint('blog', __name__)
 
 
+# Publish scheduled articles (called on every request)
+def _publish_scheduled():
+    try:
+        Article.query.filter(
+            Article.status == 'scheduled',
+            Article.scheduled_at <= datetime.now(timezone.utc)
+        ).update({'status': 'published', 'published_at': Article.scheduled_at})
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+
+
+@blog_bp.before_request
+def before_request_hooks():
+    # Publish scheduled articles on every page load
+    _last = getattr(blog_bp, '_last_publish_check', 0)
+    if time.time() - _last > 30:  # at most every 30 seconds
+        _publish_scheduled()
+        blog_bp._last_publish_check = time.time()
+
+
 @blog_bp.route('/')
 def index():
     page = request.args.get('page', 1, type=int)
     sort = request.args.get('sort', 'latest')
     category_id = request.args.get('category', 0, type=int)
     tag_id = request.args.get('tag', 0, type=int)
-
-    # Publish scheduled articles whose time has come
-    Article.query.filter(
-        Article.status == 'scheduled',
-        Article.scheduled_at <= datetime.now(timezone.utc)
-    ).update({'status': 'published', 'published_at': Article.scheduled_at})
-    db.session.commit()
 
     query = Article.query.options(joinedload(Article.author)).filter_by(status='published')
     if category_id:
@@ -44,10 +60,12 @@ def index():
     categories = Category.query.order_by(Category.sort_order).all()
     tags = Tag.query.order_by(Tag.created_at.desc()).limit(30).all()
 
-    featured = Article.query.filter_by(status='published', is_featured=True).order_by(
+    featured = Article.query.options(joinedload(Article.author)).filter_by(
+        status='published', is_featured=True).order_by(
         Article.published_at.desc()).limit(5).all()
     if not featured:
-        featured = Article.query.filter_by(status='published').order_by(
+        featured = Article.query.options(joinedload(Article.author)).filter_by(
+            status='published').order_by(
             Article.view_count.desc()).limit(5).all()
 
     return render_template('index.html',
@@ -87,13 +105,16 @@ def article(article_id):
     ).filter_by(article_id=article.id, parent_id=None, is_deleted=False)\
         .order_by(Comment.created_at.desc()).all()
 
-    # Calculate reading time
-    word_count = len(article.content) if article.content else 0
-    reading_time = max(1, word_count // 400)
+    # Calculate reading time (word-based for CJK, space-based for Latin)
+    text = article.content or ''
+    cjk = sum(1 for c in text if '\u4e00' <= c <= '\u9fff')
+    words = len(text.split())
+    total_words = cjk + words
+    reading_time = max(1, total_words // 300)
 
     return render_template('blog/article.html', article=article, comments=comments,
                            is_liked=is_liked, is_bookmarked=is_bookmarked,
-                           reading_time=reading_time, word_count=word_count)
+                           reading_time=reading_time, word_count=total_words)
 
 
 @blog_bp.route('/editor', methods=['GET', 'POST'])
@@ -203,8 +224,7 @@ def delete_article(article_id):
         return jsonify({'error': t('error_no_permission')}), 403
     article.status = 'removed'
     db.session.commit()
-    flash(t('admin_remove'), 'success')
-    return redirect(url_for('blog.index'))
+    return jsonify({'success': True})
 
 
 @blog_bp.route('/article/<int:article_id>/versions')
@@ -223,6 +243,9 @@ def article_versions(article_id):
 @blog_bp.route('/article/<int:article_id>/version/<int:version_id>')
 @login_required
 def article_version(article_id, version_id):
+    article = Article.query.get_or_404(article_id)
+    if article.author_id != current_user.id and not current_user.is_admin:
+        return jsonify({'error': t('error_no_permission')}), 403
     from app.models import ArticleVersion
     version = ArticleVersion.query.get_or_404(version_id)
     if version.article_id != article_id:
@@ -242,7 +265,7 @@ def search():
     articles = []
     pagination = None
     if q:
-        query = Article.query.filter(
+        query = Article.query.options(joinedload(Article.author)).filter(
             db.or_(
                 Article.title.contains(q),
                 Article.summary.contains(q),
@@ -258,8 +281,9 @@ def search():
 def category(category_id):
     cat = Category.query.get_or_404(category_id)
     page = request.args.get('page', 1, type=int)
-    query = Article.query.filter_by(status='published', category_id=category_id)\
-        .order_by(Article.published_at.desc())
+    query = Article.query.options(joinedload(Article.author)).filter_by(
+        status='published', category_id=category_id
+    ).order_by(Article.published_at.desc())
     pagination = paginate(query, page)
     return render_template('blog/category.html', category=cat, articles=pagination.items,
                            pagination=pagination)
@@ -294,21 +318,56 @@ def rss_feed():
         link = f'{base_url}/article/{a.id}'
         pub_date = a.published_at.strftime('%a, %d %b %Y %H:%M:%S GMT') if a.published_at else ''
         items += f'''<item>
-  <title>{a.title}</title>
-  <link>{link}</link>
-  <description>{a.summary[:200]}</description>
+  <title>{xml_escape(a.title)}</title>
+  <link>{xml_escape(link)}</link>
+  <description>{xml_escape(a.summary[:200])}</description>
   <pubDate>{pub_date}</pubDate>
-  <author>{a.author.username if a.author else ''}</author>
+  <author>{xml_escape(a.author.username if a.author else '')}</author>
 </item>'''
 
     xml = f'''<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
 <channel>
-  <title>{site_name}</title>
-  <link>{base_url}</link>
-  <description>{site_desc}</description>
+  <title>{xml_escape(site_name)}</title>
+  <link>{xml_escape(base_url)}</link>
+  <description>{xml_escape(site_desc)}</description>
   <language>zh-cn</language>
   {items}
 </channel>
 </rss>'''
     return Response(xml, mimetype='application/rss+xml')
+
+
+# ---------- Sitemap & Robots ----------
+
+@blog_bp.route('/sitemap.xml')
+def sitemap():
+    base_url = Config.SITE_URL or request.host_url.rstrip('/')
+    articles = Article.query.filter_by(status='published')\
+        .order_by(Article.published_at.desc()).limit(500).all()
+
+    urls = [f'<url><loc>{xml_escape(base_url)}/</loc><changefreq>daily</changefreq></url>']
+    for a in articles:
+        date = a.published_at.strftime('%Y-%m-%d') if a.published_at else ''
+        urls.append(f'<url><loc>{xml_escape(base_url)}/article/{a.id}</loc><lastmod>{date}</lastmod></url>')
+
+    xml = f'''<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+{"".join(urls)}
+</urlset>'''
+    return Response(xml, mimetype='application/xml')
+
+
+@blog_bp.route('/robots.txt')
+def robots():
+    base_url = Config.SITE_URL or request.host_url.rstrip('/')
+    txt = f'''User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /user/settings
+Disallow: /editor
+
+Sitemap: {base_url}/sitemap.xml
+'''
+    return Response(txt, mimetype='text/plain')

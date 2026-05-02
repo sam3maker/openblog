@@ -3,7 +3,7 @@ from flask import Blueprint, jsonify, request
 from flask_login import current_user, login_required
 from app import db
 from app.models import Article, Like, Bookmark, Comment, Follow, Report, Notification
-from app.utils import contains_sensitive, filter_sensitive
+from app.utils import contains_sensitive, filter_sensitive, sanitize_comment
 from app.i18n import t
 
 community_bp = Blueprint('community', __name__)
@@ -73,6 +73,7 @@ def add_comment(article_id):
     if sensitive:
         return jsonify({'error': t('error_sensitive_content')}), 400
     content = filter_sensitive(content)
+    content = sanitize_comment(content)
 
     comment = Comment(
         article_id=article_id, user_id=current_user.id,

@@ -270,6 +270,8 @@ class Report(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
     resolved_at = db.Column(db.DateTime, nullable=True)
 
+    reporter = db.relationship('User', foreign_keys=[reporter_id])
+
 
 # ---------- 站点配置 ----------
 
@@ -282,18 +284,25 @@ class SiteConfig(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
 
     _cache = {}
+    _cache_time = {}
+    _cache_ttl = 60  # seconds
 
     @staticmethod
     def get(key, default=''):
-        if key in SiteConfig._cache:
-            return SiteConfig._cache[key]
+        import time as _time
+        now = _time.time()
+        if key in SiteConfig._cache and key in SiteConfig._cache_time:
+            if now - SiteConfig._cache_time[key] < SiteConfig._cache_ttl:
+                return SiteConfig._cache[key]
         item = SiteConfig.query.filter_by(key=key).first()
         val = item.value if item else default
         SiteConfig._cache[key] = val
+        SiteConfig._cache_time[key] = now
         return val
 
     @staticmethod
     def set(key, value):
+        import time as _time
         item = SiteConfig.query.filter_by(key=key).first()
         if item:
             item.value = value
@@ -302,6 +311,7 @@ class SiteConfig(db.Model):
             db.session.add(item)
         db.session.commit()
         SiteConfig._cache[key] = value
+        SiteConfig._cache_time[key] = _time.time()
 
 
 # ---------- 通知 ----------

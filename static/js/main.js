@@ -92,11 +92,13 @@ function toggleFollow(userId, btnEl) {
 /* ========== Comments ========== */
 function submitComment(articleId, parentId, replyToUserId) {
     let content;
+    let inputEl;
     if (parentId) {
-        const input = document.getElementById(`reply-input-${parentId}`);
-        content = input ? input.value.trim() : '';
+        inputEl = document.getElementById(`reply-input-${parentId}`);
+        content = inputEl ? inputEl.value.trim() : '';
     } else {
-        content = document.getElementById('comment-input').value.trim();
+        inputEl = document.getElementById('comment-input');
+        content = inputEl ? inputEl.value.trim() : '';
     }
     if (!content) return false;
 
@@ -111,7 +113,11 @@ function submitComment(articleId, parentId, replyToUserId) {
             if (r.ok) return r.json();
             return r.json().then(d => { throw new Error(d.error || I18N.commentFailed); });
         })
-        .then(() => location.reload())
+        .then(() => {
+            // Clear input immediately so user sees it was sent
+            if (inputEl) inputEl.value = '';
+            location.reload();
+        })
         .catch(err => showToast(err.message || I18N.commentFailed, 'error'));
     return false;
 }
