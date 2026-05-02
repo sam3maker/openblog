@@ -91,34 +91,47 @@ def logout():
 
 @auth_bp.route('/reset_password', methods=['GET', 'POST'])
 def reset_password():
-    if request.method == 'POST':
-        email = request.form.get('email', '').strip()
+    # Step 3: After GitHub OAuth verified — set new password
+    if request.method == 'POST' and session.get('reset_verified_user_id'):
         new_password = request.form.get('new_password', '')
         confirm = request.form.get('confirm', '')
 
-        if not all([email, new_password, confirm]):
+        if not all([new_password, confirm]):
+            flash(t('error_fill_required'), 'error')
+            return render_template('auth/reset_password.html', step='set_password')
+
+        if new_password != confirm:
+            flash(t('error_password_mismatch'), 'error')
+            return render_template('auth/reset_password.html', step='set_password')
+        if len(new_password) < 6:
+            flash(t('error_password_short'), 'error')
+            return render_template('auth/reset_password.html', step='set_password')
+
+        user_id = session.pop('reset_verified_user_id')
+        user = User.query.get(user_id)
+        if user:
+            user.set_password(new_password)
+            db.session.commit()
+        session.pop('reset_verified_user_id', None)
+        session.pop('reset_email', None)
+        flash(t('toast_password_reset'), 'success')
+        return redirect(url_for('auth.login'))
+
+    # Step 1: Enter email
+    if request.method == 'POST' and not session.get('reset_verified_user_id'):
+        email = request.form.get('email', '').strip()
+        if not email:
             flash(t('error_fill_required'), 'error')
             return redirect(url_for('auth.reset_password'))
         user = User.query.filter_by(email=email).first()
         if not user:
             flash(t('error_email_not_found'), 'error')
             return redirect(url_for('auth.reset_password'))
-        if new_password != confirm:
-            flash(t('error_password_mismatch'), 'error')
-            return redirect(url_for('auth.reset_password'))
-        if len(new_password) < 6:
-            flash(t('error_password_short'), 'error')
-            return redirect(url_for('auth.reset_password'))
-        user.set_password(new_password)
-        db.session.commit()
-        flash(t('toast_password_reset'), 'success')
-        return redirect(url_for('auth.login'))
-    return render_template('auth/reset_password.html')
-        session.pop('reset_code', None)
-        session.pop('reset_email', None)
-        session.pop('reset_expires', None)
-        flash(t('toast_password_reset'), 'success')
-        return redirect(url_for('auth.login'))
+        # Store email in session, redirect to GitHub OAuth
+        session['reset_email'] = email
+        session['reset_via_github'] = True
+        return redirect(url_for('auth.github_login'))
+
     return render_template('auth/reset_password.html')
 
 
@@ -129,7 +142,8 @@ def github_login():
     if not Config.GITHUB_CLIENT_ID:
         flash(t('error_github_not_configured'), 'error')
         return redirect(url_for('auth.login'))
-    # HF Spaces provides SPACE_HOST env var automatically
+
+    # Build redirect URI
     space_host = os.environ.get('SPACE_HOST', '')
     if Config.SITE_URL:
         redirect_uri = Config.SITE_URL.rstrip('/') + url_for('auth.github_callback')
@@ -137,9 +151,13 @@ def github_login():
         redirect_uri = f'https://{space_host}' + url_for('auth.github_callback')
     else:
         redirect_uri = request.host_url.rstrip('/') + url_for('auth.github_callback')
+
+    # If this is a password reset flow, add state parameter
+    state = 'reset_password' if session.get('reset_via_github') else 'login'
+
     url = (
         f'https://github.com/login/oauth/authorize?client_id={Config.GITHUB_CLIENT_ID}'
-        f'&redirect_uri={redirect_uri}&scope=user:email'
+        f'&redirect_uri={redirect_uri}&scope=user:email&state={state}'
     )
     return redirect(url)
 
@@ -147,6 +165,7 @@ def github_login():
 @auth_bp.route('/github/callback')
 def github_callback():
     code = request.args.get('code')
+    state = request.args.get('state', 'login')
     if not code:
         flash(t('error_github_failed'), 'error')
         return redirect(url_for('auth.login'))
@@ -175,6 +194,37 @@ def github_callback():
                 primary_email = e.get('email', '')
                 break
 
+    # --- Password reset flow ---
+    if state == 'reset_password' and session.get('reset_via_github'):
+        session.pop('reset_via_github', None)
+        reset_email = session.get('reset_email', '')
+
+        if not reset_email:
+            flash(t('error_code_expired'), 'error')
+            return redirect(url_for('auth.reset_password'))
+
+        # Verify GitHub primary email matches the registered email
+        if primary_email.lower() != reset_email.lower():
+            # Also check all GitHub emails
+            gh_emails = []
+            if isinstance(emails, list):
+                gh_emails = [e.get('email', '').lower() for e in emails]
+            if reset_email.lower() not in gh_emails:
+                session.pop('reset_email', None)
+                flash(t('error_github_email_mismatch'), 'error')
+                return redirect(url_for('auth.reset_password'))
+
+        user = User.query.filter_by(email=reset_email).first()
+        if not user:
+            session.pop('reset_email', None)
+            flash(t('error_email_not_found'), 'error')
+            return redirect(url_for('auth.reset_password'))
+
+        # Verified — allow password reset
+        session['reset_verified_user_id'] = user.id
+        return render_template('auth/reset_password.html', step='set_password')
+
+    # --- Normal login/register flow ---
     user = User.query.filter_by(github_id=github_id).first()
     if not user and primary_email:
         user = User.query.filter_by(email=primary_email).first()

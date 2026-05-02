@@ -160,6 +160,8 @@
     "toast_profile_updated": "资料已更新",
     "toast_report_submitted": "举报已提交",
     "toast_password_reset": "密码重置成功，请登录",
+    "reset_via_github": "通过 GitHub 验证身份并重置密码",
+    "error_github_email_mismatch": "GitHub 邮箱与注册邮箱不匹配",
     "toast_no_permission": "无权操作",
     "toast_upload_failed": "图片上传失败",
     "toast_operation_failed": "操作失败",

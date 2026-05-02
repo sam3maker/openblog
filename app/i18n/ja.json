@@ -160,6 +160,8 @@
     "toast_profile_updated": "プロフィールを更新しました",
     "toast_report_submitted": "報告を送信しました",
     "toast_password_reset": "パスワードをリセットしました。ログインしてください",
+    "reset_via_github": "GitHubで本人確認してパスワードをリセット",
+    "error_github_email_mismatch": "GitHubのメールアドレスが登録メールと一致しません",
     "toast_no_permission": "権限がありません",
     "toast_upload_failed": "アップロードに失敗しました",
     "toast_operation_failed": "操作に失敗しました",

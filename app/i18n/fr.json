@@ -160,6 +160,8 @@
     "toast_profile_updated": "Profil mis à jour",
     "toast_report_submitted": "Signalement envoyé",
     "toast_password_reset": "Mot de passe réinitialisé, veuillez vous connecter",
+    "reset_via_github": "Vérifier avec GitHub et réinitialiser",
+    "error_github_email_mismatch": "L'email GitHub ne correspond pas à l'email enregistré",
     "toast_no_permission": "Aucune permission",
     "toast_upload_failed": "Échec du téléchargement",
     "toast_operation_failed": "L'opération a échoué",

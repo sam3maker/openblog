@@ -160,6 +160,8 @@
     "toast_profile_updated": "프로필이 업데이트되었습니다",
     "toast_report_submitted": "신고가 접수되었습니다",
     "toast_password_reset": "비밀번호가 재설정되었습니다. 로그인하세요",
+    "reset_via_github": "GitHub로 인증 후 비밀번호 재설정",
+    "error_github_email_mismatch": "GitHub 이메일이 등록된 이메일과 일치하지 않습니다",
     "toast_no_permission": "권한이 없습니다",
     "toast_upload_failed": "업로드에 실패했습니다",
     "toast_operation_failed": "작업에 실패했습니다",
