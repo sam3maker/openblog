@@ -132,8 +132,8 @@ class Article(db.Model):
     category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=True)
     editor_type = db.Column(db.String(20), default='markdown')  # markdown / rich_text
     status = db.Column(db.String(20), default='draft', index=True)  # draft / published / scheduled / removed
-    is_featured = db.Column(db.Boolean, default=False)
-    published_at = db.Column(db.DateTime, nullable=True)
+    is_featured = db.Column(db.Boolean, default=False, index=True)
+    published_at = db.Column(db.DateTime, nullable=True, index=True)
     scheduled_at = db.Column(db.DateTime, nullable=True)
     view_count = db.Column(db.Integer, default=0)
     like_count = db.Column(db.Integer, default=0)
@@ -197,7 +197,7 @@ class Comment(db.Model):
     parent_id = db.Column(db.Integer, db.ForeignKey('comments.id', ondelete='CASCADE'), nullable=True, index=True)
     reply_to_user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     content = db.Column(db.Text, nullable=False)
-    is_deleted = db.Column(db.Boolean, default=False)
+    is_deleted = db.Column(db.Boolean, default=False, index=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -266,7 +266,7 @@ class Report(db.Model):
     comment_id = db.Column(db.Integer, db.ForeignKey('comments.id', ondelete='SET NULL'), nullable=True)
     reporter_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     reason = db.Column(db.Text, nullable=False)
-    status = db.Column(db.String(20), default='pending')  # pending / resolved / rejected
+    status = db.Column(db.String(20), default='pending', index=True)  # pending / resolved / rejected
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     resolved_at = db.Column(db.DateTime, nullable=True)
 
@@ -281,10 +281,16 @@ class SiteConfig(db.Model):
     value = db.Column(db.Text, default='')
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+    _cache = {}
+
     @staticmethod
     def get(key, default=''):
+        if key in SiteConfig._cache:
+            return SiteConfig._cache[key]
         item = SiteConfig.query.filter_by(key=key).first()
-        return item.value if item else default
+        val = item.value if item else default
+        SiteConfig._cache[key] = val
+        return val
 
     @staticmethod
     def set(key, value):
@@ -295,6 +301,7 @@ class SiteConfig(db.Model):
             item = SiteConfig(key=key, value=value)
             db.session.add(item)
         db.session.commit()
+        SiteConfig._cache[key] = value
 
 
 # ---------- 通知 ----------
@@ -307,5 +314,18 @@ class Notification(db.Model):
     type = db.Column(db.String(50), nullable=False)  # like / comment / follow / system
     content = db.Column(db.Text, default='')
     link = db.Column(db.String(500), default='')
-    is_read = db.Column(db.Boolean, default=False)
+    is_read = db.Column(db.Boolean, default=False, index=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+# ---------- 上传文件（数据库存储）----------
+
+class Upload(db.Model):
+    __tablename__ = 'uploads'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    filename = db.Column(db.String(200), nullable=False)
+    content_type = db.Column(db.String(100), nullable=False)
+    data = db.Column(db.LargeBinary, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)

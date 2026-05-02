@@ -1,8 +1,8 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
 from flask_login import current_user, login_required
 from app import db
-from app.models import User, Article, Follow, Bookmark, Notification
-from app.utils import save_image, paginate, filter_sensitive
+from app.models import User, Article, Follow, Bookmark, Notification, Upload
+from app.utils import save_image, paginate, filter_sensitive, allowed_file
 from app.i18n import t
 
 user_bp = Blueprint('user', __name__)
@@ -72,10 +72,25 @@ def settings():
         current_user.bio = bio[:500]
         current_user.signature = signature[:200]
 
-        if avatar and avatar.filename:
-            path = save_image(avatar, subdir='avatars', max_size=(200, 200))
-            if path:
-                current_user.avatar = path
+        if avatar and avatar.filename and allowed_file(avatar.filename):
+            from PIL import Image
+            import io
+            img = Image.open(avatar)
+            img.thumbnail((200, 200))
+            buf = io.BytesIO()
+            fmt = avatar.filename.rsplit('.', 1)[-1].upper()
+            if fmt == 'JPG':
+                fmt = 'JPEG'
+            img.save(buf, format=fmt)
+            up = Upload(
+                filename=avatar.filename,
+                content_type=avatar.content_type or 'image/png',
+                data=buf.getvalue(),
+                user_id=current_user.id,
+            )
+            db.session.add(up)
+            db.session.flush()
+            current_user.avatar = f'/api/file/{up.id}'
 
         db.session.commit()
         flash(t('toast_profile_updated'), 'success')

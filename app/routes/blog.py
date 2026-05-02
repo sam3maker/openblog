@@ -1,6 +1,7 @@
 from datetime import datetime
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
 from flask_login import current_user, login_required
+from sqlalchemy.orm import joinedload
 from app import db
 from app.models import Article, Category, Tag, ArticleVersion, User
 from app.utils import (
@@ -19,7 +20,7 @@ def index():
     category_id = request.args.get('category', 0, type=int)
     tag_id = request.args.get('tag', 0, type=int)
 
-    query = Article.query.filter_by(status='published')
+    query = Article.query.options(joinedload(Article.author)).filter_by(status='published')
     if category_id:
         query = query.filter_by(category_id=category_id)
     if tag_id:

@@ -1,8 +1,9 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, send_file, Response
 from flask_login import current_user, login_required
 from app import db
-from app.models import Article, Category, Tag, User, SiteConfig
+from app.models import Article, Category, Tag, User, SiteConfig, Upload
 from app.i18n import t
+import io
 
 api_bp = Blueprint('api', __name__, url_prefix='/api')
 
@@ -63,15 +64,30 @@ def site_config():
 @api_bp.route('/upload', methods=['POST'])
 @login_required
 def upload():
-    """图片上传 API"""
-    from app.utils import save_image
+    """图片上传 API — 存入数据库"""
+    from app.utils import allowed_file
     file = request.files.get('file')
     if not file:
         return jsonify({'error': t('error_file_not_selected')}), 400
-    path = save_image(file, subdir='images')
-    if path:
-        return jsonify({'url': path, 'success': True})
-    return jsonify({'error': t('error_unsupported_format')}), 400
+    if not allowed_file(file.filename):
+        return jsonify({'error': t('error_unsupported_format')}), 400
+    file_data = file.read()
+    up = Upload(
+        filename=file.filename,
+        content_type=file.content_type or 'application/octet-stream',
+        data=file_data,
+        user_id=current_user.id,
+    )
+    db.session.add(up)
+    db.session.commit()
+    return jsonify({'url': f'/api/file/{up.id}', 'success': True})
+
+
+@api_bp.route('/file/<int:file_id>')
+def serve_file(file_id):
+    """从数据库读取并返回上传的文件"""
+    up = Upload.query.get_or_404(file_id)
+    return Response(up.data, mimetype=up.content_type)
 
 
 @api_bp.route('/notifications/read_all', methods=['POST'])
