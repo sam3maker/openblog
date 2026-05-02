@@ -33,6 +33,7 @@ def create_app():
     # i18n + 全局模板变量
     @app.context_processor
     def inject_globals():
+        from datetime import datetime
         from app.models import SiteConfig
         from app.i18n import t, get_language, get_supported_languages
         return {
@@ -43,9 +44,18 @@ def create_app():
             't': t,
             'current_lang': get_language(),
             'languages': get_supported_languages(),
+            'now': datetime.now(),
         }
 
     from app.routes import register_blueprints
     register_blueprints(app)
+
+    @app.errorhandler(404)
+    def not_found(e):
+        return render_template('errors/404.html'), 404
+
+    @app.errorhandler(500)
+    def server_error(e):
+        return render_template('errors/500.html'), 500
 
     return app

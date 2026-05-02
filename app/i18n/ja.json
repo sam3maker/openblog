@@ -100,6 +100,9 @@
     "user_bio": "自己紹介",
     "user_bio_placeholder": "何か書いてみましょう...",
     "user_save": "変更を保存",
+    "change_password": "パスワード変更",
+    "current_password": "現在のパスワード",
+    "back_to_settings": "設定に戻る",
     "user_email_immutable": "メールアドレスは変更できません",
 
     "admin_dashboard": "管理ダッシュボード",
@@ -201,5 +204,8 @@
     "discover_content": "コンテンツを見つける",
     "search_no_results": "結果が見つかりませんでした",
     "search_results": "検索結果",
-    "all": "すべて"
+    "all": "すべて",
+    "error_404": "ページが見つかりません",
+    "error_500": "サーバーエラー",
+    "back_home": "ホームに戻る"
 }

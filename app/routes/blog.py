@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
 from flask_login import current_user, login_required
 from sqlalchemy.orm import joinedload
@@ -144,7 +144,7 @@ def editor(article_id=None):
             if cover_path:
                 article.cover_image = cover_path
             if status == 'published' and not article.published_at:
-                article.published_at = datetime.utcnow()
+                article.published_at = datetime.now(timezone.utc)
         else:
             article = Article(
                 title=title, content=content, content_html=content_html,
@@ -153,7 +153,7 @@ def editor(article_id=None):
                 editor_type=editor_type, status=status, scheduled_at=scheduled_at,
             )
             if status == 'published':
-                article.published_at = datetime.utcnow()
+                article.published_at = datetime.now(timezone.utc)
             db.session.add(article)
 
         if tag_names:

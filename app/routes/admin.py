@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
 from flask_login import current_user, login_required
 from app import db
@@ -57,7 +57,7 @@ def toggle_article(article_id):
     elif action == 'publish':
         article.status = 'published'
         if not article.published_at:
-            article.published_at = datetime.utcnow()
+            article.published_at = datetime.now(timezone.utc)
     elif action == 'feature':
         article.is_featured = not article.is_featured
     db.session.commit()
@@ -123,7 +123,7 @@ def resolve_report(report_id):
                 article.status = 'removed'
     elif action == 'reject':
         report.status = 'rejected'
-    report.resolved_at = datetime.utcnow()
+    report.resolved_at = datetime.now(timezone.utc)
     db.session.commit()
     return jsonify({'success': True})
 
@@ -147,6 +147,7 @@ def categories():
 @admin_bp.route('/category/<int:cat_id>/delete', methods=['POST'])
 def delete_category(cat_id):
     cat = Category.query.get_or_404(cat_id)
+    Article.query.filter_by(category_id=cat_id).update({'category_id': None})
     db.session.delete(cat)
     db.session.commit()
     return jsonify({'success': True})

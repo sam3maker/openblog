@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import TEXT
@@ -20,8 +20,8 @@ class User(UserMixin, db.Model):
     role = db.Column(db.String(20), default='user')  # user / creator / admin
     github_id = db.Column(db.String(100), unique=True, nullable=True)
     is_active = db.Column(db.Boolean, default=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
 
     articles = db.relationship('Article', backref='author', lazy='dynamic')
     comments = db.relationship('Comment', foreign_keys='Comment.user_id', backref='user', lazy='dynamic')
@@ -91,7 +91,7 @@ class Category(db.Model):
     name = db.Column(db.String(100), unique=True, nullable=False)
     description = db.Column(db.Text, default='')
     sort_order = db.Column(db.Integer, default=0)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
 
     articles = db.relationship('Article', backref='category', lazy='dynamic')
 
@@ -114,7 +114,7 @@ class Tag(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(50), unique=True, nullable=False, index=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
 
 
 # ---------- 文章 ----------
@@ -139,8 +139,8 @@ class Article(db.Model):
     like_count = db.Column(db.Integer, default=0)
     comment_count = db.Column(db.Integer, default=0)
     bookmark_count = db.Column(db.Integer, default=0)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc), index=True)
+    updated_at = db.Column(db.DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
 
     tags = db.relationship('Tag', secondary=tag_article, backref=db.backref('articles', lazy='dynamic'), lazy='joined')
     comments = db.relationship('Comment', backref='article', lazy='dynamic', cascade='all, delete-orphan')
@@ -183,7 +183,7 @@ class ArticleVersion(db.Model):
     content = db.Column(TEXT, nullable=False)
     content_html = db.Column(TEXT, default='')
     version_number = db.Column(db.Integer, default=1)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
 
 
 # ---------- 评论 ----------
@@ -198,8 +198,8 @@ class Comment(db.Model):
     reply_to_user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     content = db.Column(db.Text, nullable=False)
     is_deleted = db.Column(db.Boolean, default=False, index=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc), index=True)
+    updated_at = db.Column(db.DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
 
     replies = db.relationship('Comment', backref=db.backref('parent', remote_side=[id]), lazy='dynamic')
     reply_to_user = db.relationship('User', foreign_keys=[reply_to_user_id])
@@ -225,7 +225,7 @@ class Like(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     article_id = db.Column(db.Integer, db.ForeignKey('articles.id', ondelete='CASCADE'), nullable=False, index=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
 
     __table_args__ = (db.UniqueConstraint('article_id', 'user_id'),)
 
@@ -238,7 +238,7 @@ class Bookmark(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     article_id = db.Column(db.Integer, db.ForeignKey('articles.id', ondelete='CASCADE'), nullable=False, index=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
 
     __table_args__ = (db.UniqueConstraint('article_id', 'user_id'),)
 
@@ -251,7 +251,7 @@ class Follow(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     follower_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True)
     following_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
 
     __table_args__ = (db.UniqueConstraint('follower_id', 'following_id'),)
 
@@ -267,7 +267,7 @@ class Report(db.Model):
     reporter_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     reason = db.Column(db.Text, nullable=False)
     status = db.Column(db.String(20), default='pending', index=True)  # pending / resolved / rejected
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
     resolved_at = db.Column(db.DateTime, nullable=True)
 
 
@@ -279,7 +279,7 @@ class SiteConfig(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     key = db.Column(db.String(100), unique=True, nullable=False)
     value = db.Column(db.Text, default='')
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
 
     _cache = {}
 
@@ -315,7 +315,7 @@ class Notification(db.Model):
     content = db.Column(db.Text, default='')
     link = db.Column(db.String(500), default='')
     is_read = db.Column(db.Boolean, default=False, index=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
 
 
 # ---------- 上传文件（数据库存储）----------
@@ -328,4 +328,4 @@ class Upload(db.Model):
     content_type = db.Column(db.String(100), nullable=False)
     data = db.Column(db.LargeBinary, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))

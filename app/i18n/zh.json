@@ -100,6 +100,9 @@
     "user_bio": "个人简介",
     "user_bio_placeholder": "写点什么...",
     "user_save": "保存修改",
+    "change_password": "修改密码",
+    "current_password": "当前密码",
+    "back_to_settings": "返回设置",
     "user_email_immutable": "邮箱不可修改",
 
     "admin_dashboard": "管理后台",
@@ -201,5 +204,8 @@
     "discover_content": "去发现优质内容",
     "search_no_results": "未找到相关文章",
     "search_results": "搜索结果",
-    "all": "全部"
+    "all": "全部",
+    "error_404": "页面未找到",
+    "error_500": "服务器内部错误",
+    "back_home": "返回首页"
 }

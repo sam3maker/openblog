@@ -99,6 +99,27 @@ def settings():
     return render_template('user/settings.html')
 
 
+@user_bp.route('/user/change_password', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    if request.method == 'POST':
+        old_password = request.form.get('old_password', '')
+        new_password = request.form.get('new_password', '')
+        confirm = request.form.get('confirm', '')
+        if not current_user.check_password(old_password):
+            flash(t('error_login_failed'), 'error')
+        elif len(new_password) < 6:
+            flash(t('error_password_short'), 'error')
+        elif new_password != confirm:
+            flash(t('error_password_mismatch'), 'error')
+        else:
+            current_user.set_password(new_password)
+            db.session.commit()
+            flash(t('toast_password_reset'), 'success')
+            return redirect(url_for('user.settings'))
+    return render_template('user/change_password.html')
+
+
 @user_bp.route('/timeline')
 @login_required
 def timeline():

@@ -100,6 +100,9 @@
     "user_bio": "Bio",
     "user_bio_placeholder": "Write something...",
     "user_save": "Save Changes",
+    "change_password": "Change Password",
+    "current_password": "Current Password",
+    "back_to_settings": "Back to settings",
     "user_email_immutable": "Email cannot be changed",
 
     "admin_dashboard": "Admin Dashboard",
@@ -201,5 +204,8 @@
     "discover_content": "Discover content",
     "search_no_results": "No results found",
     "search_results": "Search Results",
-    "all": "All"
+    "all": "All",
+    "error_404": "Page not found",
+    "error_500": "Internal server error",
+    "back_home": "Back to Home"
 }

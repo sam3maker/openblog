@@ -100,6 +100,9 @@
     "user_bio": "Biographie",
     "user_bio_placeholder": "Écrivez quelque chose...",
     "user_save": "Enregistrer les modifications",
+    "change_password": "Changer le mot de passe",
+    "current_password": "Mot de passe actuel",
+    "back_to_settings": "Retour aux paramètres",
     "user_email_immutable": "L'e-mail ne peut pas être modifié",
 
     "admin_dashboard": "Tableau de bord administrateur",
@@ -201,5 +204,8 @@
     "discover_content": "Découvrir du contenu",
     "search_no_results": "Aucun résultat trouvé",
     "search_results": "Résultats de recherche",
-    "all": "Tout"
+    "all": "Tout",
+    "error_404": "Page non trouvée",
+    "error_500": "Erreur interne du serveur",
+    "back_home": "Retour à l'accueil"
 }

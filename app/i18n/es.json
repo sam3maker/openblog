@@ -100,6 +100,9 @@
     "user_bio": "Biografía",
     "user_bio_placeholder": "Escriba algo sobre usted...",
     "user_save": "Guardar cambios",
+    "change_password": "Cambiar contraseña",
+    "current_password": "Contraseña actual",
+    "back_to_settings": "Volver a la configuración",
     "user_email_immutable": "El correo electrónico no se puede cambiar",
 
     "admin_dashboard": "Panel de administración",
@@ -201,5 +204,8 @@
     "discover_content": "Descubrir contenido",
     "search_no_results": "Sin resultados",
     "search_results": "Resultados de búsqueda",
-    "all": "Todo"
+    "all": "Todo",
+    "error_404": "Página no encontrada",
+    "error_500": "Error interno del servidor",
+    "back_home": "Volver al inicio"
 }

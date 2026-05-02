@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import secrets as py_secrets
 import requests
 from flask import Blueprint, render_template, redirect, url_for, flash, request, session
@@ -47,6 +48,9 @@ def register():
 
         if not all([username, email, password]):
             flash(t('error_fill_required'), 'error')
+            return redirect(url_for('auth.register'))
+        if not re.match(r'^[^@\s]+@[^@\s]+\.[^@\s]+$', email):
+            flash(t('email') + ' ' + t('error_fill_required').lower(), 'error')
             return redirect(url_for('auth.register'))
         if len(username) < 3 or len(username) > 20:
             flash(t('error_username_length'), 'error')
@@ -98,7 +102,6 @@ def reset_password():
         code = f'{py_secrets.randbelow(1000000):06d}'
         session['reset_code'] = code
         session['reset_email'] = email
-        session['reset_expires'] = (os.environ.get('', '') or __import__('datetime').datetime.now(__import__('datetime').timezone.utc).isoformat())
         # Calculate expiry
         from datetime import datetime, timezone, timedelta
         session['reset_expires'] = (datetime.now(timezone.utc) + timedelta(minutes=10)).isoformat()
